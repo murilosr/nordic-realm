@@ -1,0 +1,2 @@
+class ComponentNotRegistered(Exception):
+    pass
