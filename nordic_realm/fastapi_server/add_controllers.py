@@ -1,5 +1,7 @@
 from importlib import import_module
 from functools import partial, update_wrapper
+from re import Pattern
+import re
 from typing import Any
 from fastapi import FastAPI
 from starlette.routing import compile_path
@@ -23,7 +25,7 @@ def instance_obj_endpoint(clz, method):
 
 def add_controllers():
     app = ApplicationContext.get().fastapi_app
-    app._NR_public_paths = []
+    app._NR_public_paths = [re.compile("/docs[$|/*$]"), re.compile("/openapi.json")]
     for _v in ApplicationContext.get().component_store._store.values():
         if isinstance(_v, type):
             if("_NR_type" in _v.__dict__):

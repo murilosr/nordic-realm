@@ -20,5 +20,5 @@ app.add_middleware(AuthenticationMiddleware, backend=OAuthSecurityBackend())
 def run_app():
     global started
     if not started:
-        uvicorn.run(f"nordic_realm.launcher:app", host="127.0.0.1", port=8080, reload=True, workers=1)
+        uvicorn.run(f"nordic_realm.launcher:app", host="0.0.0.0", port=8080, reload=True, workers=1)
         started = True

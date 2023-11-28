@@ -15,19 +15,29 @@ class ComponentStore(Generic[T]):
         return f"{clz.__module__}:{clz.__name__}";
     
     def register(self, clz: Type):
-        _key = self._get_name(clz)
-        if _key in self._store:
-            # print(f"{_key} already registered")
-            return
+        is_override = False
+        _key : str
+        if(hasattr(clz, "_NR_base_component")):
+            _key = self._get_name(clz=clz._NR_base_component)
+            print(f"{self._get_name(clz)} override {_key}")
+        else:
+            _key = self._get_name(clz)
+            if _key in self._store and hasattr(self._store[_key], "_NR_base_component"):
+                return
         
-        print(f"registered: {clz.__module__}:{clz.__name__}")
-        self._store[f"{clz.__module__}:{clz.__name__}"] = clz
+        print(f"registered: {_key}")
+        self._store[f"{_key}"] = clz
         
     def get(self, clazz : T) -> T:
         if(not isclass(clazz)):
             raise TypeError(f"{clazz} is not a class")
         
-        _name = self._get_name(clazz)
+        _name : str
+        if hasattr(clazz, "_NR_base_component"):
+            _name = self._get_name(clazz._NR_base_component)
+        else:
+            _name = self._get_name(clazz)
+
         try:
             return self._store[_name]
         except KeyError:

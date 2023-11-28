@@ -1,3 +1,4 @@
+from pickletools import int4
 from typing import Annotated, Any, Dict, Generic, Optional, Type, TypeVar
 from nordic_realm.application.context import ApplicationContext
 from inspect import isclass
@@ -29,17 +30,17 @@ class DIInjector(Generic[T]):
         # Check if it is singleton
         try:
             _singleton_obj = self.app_context.singleton_store.get(_clazz)
-            #print(f"{annotation_type} is a singleton")
+            # print(f"{annotation_type} is a singleton")
             return _singleton_obj
         except ComponentNotRegistered:
-            #print(f"{annotation_type} not a singleton")
+            # print(f"{annotation_type} not a singleton")
             pass
         
         try:
             _clazz = ApplicationContext.get().component_store.get(_clazz)
-            #print(f"{annotation_type} is a component")
+            # print(f"{annotation_type} is a component")
         except ComponentNotRegistered as err:
-            #print(f"{annotation_type} not a component")
+            # print(f"{annotation_type} not a component")
             raise err
         _new_subobject = self.instance(_clazz)
         
@@ -56,9 +57,12 @@ class DIInjector(Generic[T]):
         
         if(hasattr(clazz, "__annotations__")):
             for _ank, _anv in clazz.__annotations__.items():
+                # print(f"Field {_ank} - ", end="")
                 try:
+                    # print(f"{self._get_object(_anv)}")
                     setattr(_new_obj, _ank, self._get_object(_anv))
                 except ComponentNotRegistered:
+                    # print("Not registered")
                     continue
         
         for _parent_class in clazz.mro()[1:]:

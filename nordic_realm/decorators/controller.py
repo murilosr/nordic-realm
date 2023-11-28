@@ -8,6 +8,14 @@ def Component(*args, **kwargs):
         return args2[0]
     return wrapper
 
+def Implement(base_class : Type, *args, **kwargs):
+    def wrapper(*args2, **kwargs2):
+        print(args, kwargs, args2, kwargs2)
+        args2[0]._NR_component = True
+        args2[0]._NR_base_component = base_class
+        return args2[0]
+    return wrapper
+
 def Controller(path: str, *args, **kwargs):
     def wrapper(*args2, **kwargs2):
         Component()(args2[0])
@@ -62,5 +70,7 @@ def Get(
 def Post(
     path : str,
     response_model : Type = None,
+    response_code : HTTPStatus | int | None = None,
+    public : bool = False
 ):
-    return MethodRouteMap("POST")(path, response_model)
+    return MethodRouteMap("POST")(path, response_model, response_code, public)
