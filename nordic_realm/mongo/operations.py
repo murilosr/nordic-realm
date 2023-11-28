@@ -1,7 +1,8 @@
 from typing import Any, Dict, Generic, Type, TypeVar
+
 from pymongo.collection import Collection
 
-from nordic_realm.mongo.exceptions import DocumentNotFound, MultipleDocumentFound
+from .exceptions import DocumentNotFound, MultipleDocumentFound
 
 T = TypeVar("T")
 
@@ -30,6 +31,5 @@ class MongoOperations(Generic[T]):
         filter : Dict[Any, Any],
     ) -> bool:
         _result = list(collection.find(filter, limit = 1, projection={"_id":1}))
-        print(_result)
-
         return len(_result) == 1
+    

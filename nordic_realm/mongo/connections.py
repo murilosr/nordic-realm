@@ -1,5 +1,7 @@
 from typing import Any, Dict
+
 from pymongo import MongoClient
+
 
 class MongoConnections:
     

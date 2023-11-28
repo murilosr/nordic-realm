@@ -1,8 +1,10 @@
+import logging
 from inspect import isclass
 from typing import Dict, Generic, Type, TypeVar
 
-from nordic_realm.di.exceptions import ComponentNotRegistered
+from .exceptions import ComponentNotRegistered
 
+log = logging.getLogger("nordic_realm.di")
 T = TypeVar("T")
 
 class ComponentStore(Generic[T]):
@@ -15,17 +17,16 @@ class ComponentStore(Generic[T]):
         return f"{clz.__module__}:{clz.__name__}";
     
     def register(self, clz: Type):
-        is_override = False
         _key : str
         if(hasattr(clz, "_NR_base_component")):
             _key = self._get_name(clz=clz._NR_base_component)
-            print(f"{self._get_name(clz)} override {_key}")
+            log.info(f"{self._get_name(clz)} override {_key}")
         else:
             _key = self._get_name(clz)
             if _key in self._store and hasattr(self._store[_key], "_NR_base_component"):
                 return
         
-        print(f"registered: {_key}")
+        log.debug(f"registered: {_key}")
         self._store[f"{_key}"] = clz
         
     def get(self, clazz : T) -> T:

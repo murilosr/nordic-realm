@@ -1,15 +1,14 @@
-from starlette.applications import Starlette
-from starlette.authentication import (
-    AuthCredentials, AuthenticationBackend, AuthenticationError, SimpleUser, UnauthenticatedUser
-)
-from starlette.middleware import Middleware
-from starlette.middleware.authentication import AuthenticationMiddleware
-from starlette.responses import PlainTextResponse
-from starlette.routing import Route
 import base64
 import binascii
-from fastapi import FastAPI
 from re import Pattern
+
+from fastapi import FastAPI
+from starlette.authentication import (AuthCredentials, AuthenticationBackend,
+                                      AuthenticationError, SimpleUser,
+                                      UnauthenticatedUser)
+from starlette.middleware import Middleware
+from starlette.middleware.authentication import AuthenticationMiddleware
+
 
 class OAuthSecurityBackend(AuthenticationBackend):
     async def authenticate(self, conn):

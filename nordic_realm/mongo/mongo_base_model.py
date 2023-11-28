@@ -1,7 +1,10 @@
 from typing import Type
-from typing_extensions import Annotated, Union, Any, TypeVar, Generic, Dict
+
 from bson import ObjectId
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, AfterValidator, WithJsonSchema
+from pydantic import (AfterValidator, BaseModel, ConfigDict, Field,
+                      PlainSerializer, WithJsonSchema)
+from typing_extensions import Annotated, Any, Dict, Generic, TypeVar, Union
+
 
 def validate_object_id(v: Any) -> ObjectId:
     if isinstance(v, ObjectId):

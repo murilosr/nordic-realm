@@ -1,0 +1,24 @@
+logging:
+  version: 1
+  disable_existing_loggers: False
+
+  formatters:
+      default:
+          format: '[%(asctime)s][%(levelname)-4.4s][%(name)20.20s](%(funcName)s): %(message)s'
+
+  handlers:
+      console:
+          class: logging.StreamHandler
+          level: DEBUG
+          formatter: default
+          stream: ext://sys.stdout
+
+  loggers:
+      nordic_realm.di:
+        level: DEBUG
+        handlers: [console]
+        propagate: no
+
+  root:
+      level: DEBUG
+      handlers: [console]

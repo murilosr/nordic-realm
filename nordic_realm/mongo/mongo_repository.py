@@ -1,22 +1,19 @@
-from typing import Any, Generic, List, Optional, TypeVar, Type
+from typing import Annotated, Any, ClassVar, Generic, List, Optional, Type, TypeVar
 
-from pymongo import MongoClient
 from bson import ObjectId
+from pymongo import MongoClient
 
-from nordic_realm.MongoBaseModel import MongoBaseModel, PyObjectId
-from nordic_realm.decorators.controller import Repository
+from .mongo_base_model import MongoBaseModel, PyObjectId
 
 MODEL = TypeVar('MODEL', bound=MongoBaseModel[Any])
 ID_TYPE = TypeVar('ID_TYPE')
 
 class MongoRepository(Generic[MODEL, ID_TYPE]):
     _MONGO_CLIENT : MongoClient
+    _DB : Annotated[str, ClassVar]
+    _COLLECTION : Annotated[str, ClassVar]
     
     def _post_init(self):
-        #print(hasattr(self, "_MONGO_CLIENT"), hasattr(self, "_DB"), hasattr(self, "_COLLECTION"))
-        #print(getattr(self, "_MONGO_CLIENT"))
-        #print(getattr(self, "_DB"))
-        #print(getattr(self, "_COLLECTION"))
         self._MONGO = self._MONGO_CLIENT[self._DB][self._COLLECTION]
     
     def get_all(self) -> List[MODEL]:

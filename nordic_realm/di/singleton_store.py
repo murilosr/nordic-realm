@@ -1,8 +1,10 @@
+import logging
 from inspect import isclass
 from typing import Any, Dict, Generic, Type, TypeVar
 
-from nordic_realm.di.exceptions import ComponentNotRegistered
+from .exceptions import ComponentNotRegistered
 
+log = logging.getLogger("nordic_realm.di")
 T = TypeVar("T")
 
 class SingletonStore(Generic[T]):
@@ -17,10 +19,10 @@ class SingletonStore(Generic[T]):
     def register(self, obj: Any):
         _key = self._get_name(type(obj))
         if _key in self._store:
-            # print(f"{_key} already registered")
+            log.debug(f"singleton {_key} already registered")
             return
         
-        print(f"singleton registered: {_key}")
+        log.debug(f"singleton registered: {_key}")
         self._store[_key] = obj
         
     def get(self, clazz : Type[T]) -> T:

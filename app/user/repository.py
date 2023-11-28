@@ -1,7 +1,7 @@
 from app.user.user import User
 from nordic_realm.decorators.controller import Repository
 from nordic_realm.mongo.operations import MongoOperations
-from nordic_realm.mongo_repository import MongoRepository
+from nordic_realm.mongo import MongoRepository, MongoOperations
 
 @Repository("users", db="pytest")
 class UserRepository(MongoRepository[User, str]):

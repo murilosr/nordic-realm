@@ -8,12 +8,12 @@ from app.auth_server.interfaces.password_authentication_provider import \
 from app.auth_server.service import AuthServerService
 from app.user.service import UserService
 from nordic_realm.decorators.controller import Controller, Get, Post
-
+import logging
 
 @Controller("/auth")
 class AuthServerController:
     pass_auth_provider : PasswordAuthenticationProvider
-    service : AuthServerService
+    auth_service : AuthServerService
     user_service : UserService
     
     @Post("/login", public=True)
@@ -23,6 +23,10 @@ class AuthServerController:
     
     @Get("/google", public=True)
     def google_oauth_code_exchange(self, code : Annotated[str, Query()]):
-        self.service.google_auth_api_code_exchange(code)
+        self.auth_service.google_auth_api_code_exchange(code)
         return {}
+    
+    @Get("/test", public=True)
+    def test(self):
+        return [name for name in logging.root.manager.loggerDict]
     

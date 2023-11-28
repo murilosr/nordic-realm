@@ -3,7 +3,7 @@ from typing import Annotated
 from uuid import uuid4
 
 from pydantic import Field
-from nordic_realm.MongoBaseModel import MongoBaseModel, PyObjectId
+from nordic_realm.mongo.mongo_base_model import MongoBaseModel, PyObjectId
 
 class AuthToken(MongoBaseModel[str]):
     

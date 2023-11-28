@@ -1,11 +1,15 @@
-from pickletools import int4
-from typing import Annotated, Any, Dict, Generic, Optional, Type, TypeVar
-from nordic_realm.application.context import ApplicationContext
+import logging
 from inspect import isclass
+from typing import Annotated, Generic, Optional, Type, TypeVar, ClassVar
+from typing_extensions import _AnnotatedAlias
 
-from nordic_realm.di.exceptions import ComponentNotRegistered
+from nordic_realm.application import ApplicationContext
+
+from .annotations import Config
+from .exceptions import ComponentNotRegistered, IgnoreInjection
 
 T = TypeVar("T")
+log = logging.getLogger("nordic_realm.di")
 
 class DIInjector(Generic[T]):
     
@@ -19,10 +23,22 @@ class DIInjector(Generic[T]):
     def _get_object(self, annotation_type : Type):
         _clazz : type
         if(isinstance(annotation_type, Annotated)):
-            #print(f"{annotation_type} is annotated")
+            log.debug(f"{annotation_type} is annotated")
             _clazz = annotation_type.__args__[0]
+            for _ann in annotation_type.__args__[1:]:
+                if(isinstance(_ann, Config)):
+                    return self.app_context.config_store.get(_ann.path)
+                elif(isinstance(_ann, ClassVar)):
+                    raise IgnoreInjection()
+        elif(isinstance(annotation_type, _AnnotatedAlias)):
+            _clazz = annotation_type.__args__[0]
+            for _ann in annotation_type.__metadata__[1:]:
+                if(isinstance(_ann, Config)):
+                    return self.app_context.config_store.get(_ann.path)
+                elif(isinstance(_ann, ClassVar)):
+                    raise IgnoreInjection()
         elif(isclass(annotation_type)):
-            #print(f"{annotation_type} is class")
+            log.debug(f"{annotation_type} is class")
             _clazz = annotation_type
         else:
             raise Exception(f"not supposed to be here {annotation_type}")
@@ -30,17 +46,17 @@ class DIInjector(Generic[T]):
         # Check if it is singleton
         try:
             _singleton_obj = self.app_context.singleton_store.get(_clazz)
-            # print(f"{annotation_type} is a singleton")
+            log.debug(f"{annotation_type} is a singleton")
             return _singleton_obj
         except ComponentNotRegistered:
-            # print(f"{annotation_type} not a singleton")
+            log.debug(f"{annotation_type} not a singleton")
             pass
         
         try:
             _clazz = ApplicationContext.get().component_store.get(_clazz)
-            # print(f"{annotation_type} is a component")
+            log.debug(f"{annotation_type} is a component")
         except ComponentNotRegistered as err:
-            # print(f"{annotation_type} not a component")
+            log.debug(f"{annotation_type} not a component")
             raise err
         _new_subobject = self.instance(_clazz)
         
@@ -52,17 +68,19 @@ class DIInjector(Generic[T]):
     
     def instance(self, clazz : Type[T], _new_obj : T | None = None) -> T:
         if(_new_obj is None):
-            #print(f"Injector: instancing a new object of type {clazz}")
+            log.debug(f"Injector: instancing a new object of type {clazz}")
             _new_obj : T = ApplicationContext.get().component_store.get(clazz)()
         
         if(hasattr(clazz, "__annotations__")):
             for _ank, _anv in clazz.__annotations__.items():
-                # print(f"Field {_ank} - ", end="")
+                log.debug(f"Field {_ank} - ")
                 try:
-                    # print(f"{self._get_object(_anv)}")
+                    log.debug(f"{self._get_object(_anv)}")
                     setattr(_new_obj, _ank, self._get_object(_anv))
                 except ComponentNotRegistered:
-                    # print("Not registered")
+                    log.debug("Not registered")
+                    continue
+                except IgnoreInjection:
                     continue
         
         for _parent_class in clazz.mro()[1:]:

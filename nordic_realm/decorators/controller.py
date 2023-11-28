@@ -1,16 +1,16 @@
 from http import HTTPStatus
-from typing_extensions import Literal, Type, Callable, Any
+
+from typing_extensions import Any, Callable, Literal, Type
+
 
 def Component(*args, **kwargs):
     def wrapper(*args2, **kwargs2):
-        print(args, kwargs, args2, kwargs2)
         args2[0]._NR_component = True
         return args2[0]
     return wrapper
 
 def Implement(base_class : Type, *args, **kwargs):
     def wrapper(*args2, **kwargs2):
-        print(args, kwargs, args2, kwargs2)
         args2[0]._NR_component = True
         args2[0]._NR_base_component = base_class
         return args2[0]

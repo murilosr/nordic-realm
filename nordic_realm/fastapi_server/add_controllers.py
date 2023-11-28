@@ -1,18 +1,14 @@
-from importlib import import_module
-from functools import partial, update_wrapper
-from re import Pattern
-import re
-from typing import Any
-from fastapi import FastAPI
-from starlette.routing import compile_path
 import inspect
+import re
+
+from starlette.routing import compile_path
 
 from nordic_realm.application.context import ApplicationContext
 from nordic_realm.di.injector import DIInjector
 
+
 def instance_obj_endpoint(clz, method):
     def wrapper(*args, **kwargs):
-        #print(clz.__dict__)
         c = DIInjector().instance(clz)
         return getattr(c,method.__name__)(*args, **kwargs)
     
@@ -32,7 +28,6 @@ def add_controllers():
                 if(_v._NR_type == "controller"):
                     base_path = _v._NR_path
                     for _controller_method in _v.__dict__.values():
-                        # print(type(_controller_method))
                         if(callable(_controller_method)):
                             if("_NR_type" in dir(_controller_method)):
                                 if(_controller_method._NR_type == "controller_method"):

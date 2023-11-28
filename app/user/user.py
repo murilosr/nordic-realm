@@ -1,6 +1,4 @@
-from nordic_realm.MongoBaseModel import MongoBaseModel
-from nordic_realm.mongo_repository import MongoRepository
-
+from nordic_realm.mongo import MongoBaseModel
 
 class User(MongoBaseModel[str]):
 

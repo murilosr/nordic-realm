@@ -1,14 +1,15 @@
-import logging
-from pymongo import MongoClient
-from nordic_realm.application.context import ApplicationContext
-from nordic_realm.di.injector import DIInjector
-from nordic_realm.di.scanner import DIScanner
-from nordic_realm.fastapi_server.filters.security_middleware import AuthenticationMiddleware, OAuthSecurityBackend
-from .fastapi_server.app import app
-from .fastapi_server.add_controllers import add_controllers
 import uvicorn
-from app.controllers import HelloWorld
 
+from nordic_realm.application.context import ApplicationContext
+from nordic_realm.di.scanner import DIScanner
+from nordic_realm.fastapi_server.filters.security_middleware import (
+    AuthenticationMiddleware, OAuthSecurityBackend)
+from nordic_realm.log import Log
+
+from .fastapi_server.add_controllers import add_controllers
+from .fastapi_server.app import app
+
+Log()
 started = False
 ApplicationContext(app, True)
 
@@ -20,5 +21,14 @@ app.add_middleware(AuthenticationMiddleware, backend=OAuthSecurityBackend())
 def run_app():
     global started
     if not started:
-        uvicorn.run(f"nordic_realm.launcher:app", host="0.0.0.0", port=8080, reload=True, workers=1)
         started = True
+        
+        uvicorn.run(
+            app=f"nordic_realm.launcher:app",
+            host="0.0.0.0",
+            port=8080,
+            reload=True,
+            workers=1,
+            log_config=Log()._config
+        )
+        
