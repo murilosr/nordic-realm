@@ -35,7 +35,7 @@ class ComponentStore(Generic[T]):
         
         _name : str
         if hasattr(clazz, "_NR_base_component"):
-            _name = self._get_name(clazz._NR_base_component)
+            _name = self._get_name(clazz._NR_base_component) # type: ignore
         else:
             _name = self._get_name(clazz)
 

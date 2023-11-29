@@ -22,7 +22,7 @@ class ConfigStore:
                 _store.update(yaml.safe_load(file))
         return _store
     
-    def get(self, path : str) -> Dict[str, Any] | Any:
+    def get(self, path : str) -> Any:
         try:
             return get_value_from_dict_path(path, self._store)
         except (TypeError, KeyError):

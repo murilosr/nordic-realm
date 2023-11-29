@@ -1,5 +1,6 @@
 import inspect
 import re
+from typing import List
 
 from starlette.routing import compile_path
 
@@ -21,12 +22,12 @@ def instance_obj_endpoint(clz, method):
 
 def add_controllers():
     app = ApplicationContext.get().fastapi_app
-    app._NR_public_paths = [re.compile("/docs[$|/*$]"), re.compile("/openapi.json")]
+    app._NR_public_paths = [re.compile("/docs[$|/*$]"), re.compile("/openapi.json")] # type: ignore
     for _v in ApplicationContext.get().component_store._store.values():
         if isinstance(_v, type):
             if("_NR_type" in _v.__dict__):
-                if(_v._NR_type == "controller"):
-                    base_path = _v._NR_path
+                if(_v._NR_type == "controller"): # type: ignore
+                    base_path = _v._NR_path # type: ignore
                     for _controller_method in _v.__dict__.values():
                         if(callable(_controller_method)):
                             if("_NR_type" in dir(_controller_method)):
@@ -42,4 +43,4 @@ def add_controllers():
                                         status_code=response_status_code
                                     )
                                     if(hasattr(_controller_method, "_NR_public_path") and _controller_method._NR_public_path):
-                                        app._NR_public_paths.append(compile_path(full_path)[0])
+                                        app._NR_public_paths.append(compile_path(full_path)[0]) # type: ignore

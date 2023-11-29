@@ -1,6 +1,6 @@
 import logging
 from inspect import isclass
-from typing import Annotated, Generic, Optional, Type, TypeVar, ClassVar
+from typing import Annotated, Callable, Generic, Optional, Type, TypeVar, ClassVar
 from typing_extensions import _AnnotatedAlias
 
 from nordic_realm.application import ApplicationContext
@@ -21,10 +21,10 @@ class DIInjector(Generic[T]):
         return f"{clz.__module__}:{clz.__name__}"
     
     def _get_object(self, annotation_type : Type):
-        _clazz : type
+        _clazz : Type
         if(isinstance(annotation_type, Annotated)):
             log.debug(f"{annotation_type} is annotated")
-            _clazz = annotation_type.__args__[0]
+            _clazz : Type = annotation_type.__args__[0]
             for _ann in annotation_type.__args__[1:]:
                 if(isinstance(_ann, Config)):
                     return self.app_context.config_store.get(_ann.path)
@@ -60,13 +60,13 @@ class DIInjector(Generic[T]):
             raise err
         _new_subobject = self.instance(_clazz)
         
-        if(hasattr(_new_subobject, "_post_init") and callable(_new_subobject._post_init)):
-            _new_subobject._post_init()
+        if(hasattr(_new_subobject, "_post_init") and callable(_new_subobject._post_init)): # type: ignore
+            _new_subobject._post_init() # type: ignore
         
         return _new_subobject
             
     
-    def instance(self, clazz : Type[T], _new_obj : T | None = None) -> T:
+    def instance(self, clazz : Type[T], _new_obj : T | None = None) -> T: # type: ignore
         if(_new_obj is None):
             log.debug(f"Injector: instancing a new object of type {clazz}")
             _new_obj : T = ApplicationContext.get().component_store.get(clazz)()
@@ -84,7 +84,7 @@ class DIInjector(Generic[T]):
                     continue
         
         for _parent_class in clazz.mro()[1:]:
-            self.instance(_parent_class, _new_obj)
+            self.instance(_parent_class, _new_obj) # type: ignore
         
         return _new_obj
     

@@ -20,11 +20,23 @@ class ApplicationContext:
         self.singleton_store = SingletonStore()
         self.mongo_conns = MongoConnections()
         
-        self.mongo_conns.register(
-            name=None,
-            params=self.config_store.get("mongodb")
-        )
-        
         if(set_global):
             global _global_app_context
             _global_app_context = self
+        
+        self._start_modules()
+    
+    def _get_mongo_connection_config(self):
+        _config = self.config_store.get("mongodb")
+        if not isinstance(_config, dict):
+            raise ValueError("mongodb not found in secrets.yaml")
+        _config = _config.copy()
+        _config.pop("db", None)
+
+        return _config
+
+    def _start_modules(self):
+        self.mongo_conns.register(
+            name=None,
+            params=self._get_mongo_connection_config()
+        )

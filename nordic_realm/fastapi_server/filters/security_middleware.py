@@ -21,7 +21,7 @@ class OAuthSecurityBackend(AuthenticationBackend):
         else:
             slash_normalized_path = path + "/"
         
-        for _path_re in app._NR_public_paths:
+        for _path_re in app._NR_public_paths: # type: ignore
             _path_re : Pattern
             if(_path_re.match(path) or _path_re.match(slash_normalized_path)):
                 return AuthCredentials(), UnauthenticatedUser()

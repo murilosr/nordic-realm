@@ -2,6 +2,8 @@ from http import HTTPStatus
 
 from typing_extensions import Any, Callable, Literal, Type
 
+from nordic_realm.application.context import ApplicationContext
+
 
 def Component(*args, **kwargs):
     def wrapper(*args2, **kwargs2):
@@ -31,7 +33,11 @@ def Service(*args, **kwargs):
         return args2[0]
     return wrapper
 
-def Repository(collection : str, db : str, *args, **kwargs):
+def Repository(collection : str, db : str | None = None, *args, **kwargs):
+    if(db is None):
+        db = ApplicationContext.get().config_store.get("mongodb.db")
+        if not isinstance(db, str):
+            raise ValueError("Provide a database via 'db' parameter or via mongodb.db in secrets.yaml") 
     def wrapper(*args2, **kwargs2):
         Component()(args2[0])
         args2[0]._NR_type = "repository"
