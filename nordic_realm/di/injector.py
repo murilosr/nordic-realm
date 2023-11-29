@@ -28,14 +28,14 @@ class DIInjector(Generic[T]):
             for _ann in annotation_type.__args__[1:]:
                 if(isinstance(_ann, Config)):
                     return self.app_context.config_store.get(_ann.path)
-                elif(isinstance(_ann, ClassVar)):
+                elif(_ann == ClassVar):
                     raise IgnoreInjection()
         elif(isinstance(annotation_type, _AnnotatedAlias)):
             _clazz = annotation_type.__args__[0]
-            for _ann in annotation_type.__metadata__[1:]:
+            for _ann in annotation_type.__metadata__:
                 if(isinstance(_ann, Config)):
                     return self.app_context.config_store.get(_ann.path)
-                elif(isinstance(_ann, ClassVar)):
+                elif(_ann == ClassVar):
                     raise IgnoreInjection()
         elif(isclass(annotation_type)):
             log.debug(f"{annotation_type} is class")

@@ -16,9 +16,9 @@ class PasswordAuthenticationProviderImpl:
             user = self.user_service.get_user_by_email(username)
             assert user.id is not None
         except DocumentNotFound:
-            raise UserNotFound()
+            raise UserNotFound("User not found")
         
         if(not self.password_hash_provider.verify(user.password, password)):
-            raise IncorrectPassword()
+            raise IncorrectPassword("Incorrect password for provided user")
         
         return AuthUser(user.id, user.email)
