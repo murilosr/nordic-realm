@@ -29,3 +29,8 @@ class UserSession(MongoBaseModel[PyObjectId]):
             user_id=user_id,
             user_agent=user_agent
         )
+    
+    def generate_new_tokens(self):
+        self.access_token_tid = token_factory()
+        self.refresh_token_tid = token_factory()
+        self.expiry_dt = expiry_dt_factory()

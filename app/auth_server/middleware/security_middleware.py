@@ -61,9 +61,12 @@ class OAuthSecurityMiddleware(AuthenticationBackend):
 
         return AuthCredentials([]), AuthUser(id=session.user_id, username=user.name)
     
+    def _return_unauthenticated_credentials(self):
+        return AuthCredentials([]), UnauthenticatedUser()
+    
     def _raise_error_or_return_unauthenticated(self, error_msg : str, path_is_public : bool):
         if path_is_public:
-            return AuthCredentials([]), UnauthenticatedUser()
+            return self._return_unauthenticated_credentials()
         raise AuthenticationError(error_msg)
 
     
@@ -81,7 +84,6 @@ class OAuthSecurityMiddleware(AuthenticationBackend):
         for _path_re in app._NR_public_paths: # type: ignore
             _path_re : Pattern
             if(_path_re.match(path) or _path_re.match(slash_normalized_path)):
-                path_is_public = True
-                break
+                return self._return_unauthenticated_credentials()
         
         return self._process_authorization(conn.headers.get("Authorization", None), path_is_public)

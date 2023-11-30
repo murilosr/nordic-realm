@@ -15,7 +15,7 @@ logging:
 
     loggers:
         nordic_realm.di:
-            level: DEBUG
+            level: INFO
 
     root:
         level: INFO
