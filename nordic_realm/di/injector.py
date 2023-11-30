@@ -1,6 +1,6 @@
 import logging
 from inspect import isclass
-from typing import Annotated, Callable, Generic, Optional, Type, TypeVar, ClassVar
+from typing import Annotated, Generic, Optional, Type, TypeVar, ClassVar
 from typing_extensions import _AnnotatedAlias
 
 from nordic_realm.application import ApplicationContext
