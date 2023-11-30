@@ -23,7 +23,7 @@ PyObjectId = Annotated[
 ID_TYPE = TypeVar('ID_TYPE', default=PyObjectId)
 
 class MongoBaseModel(BaseModel, Generic[ID_TYPE]):
-    id : ID_TYPE | None = Field(default=None, alias="_id")
+    id : ID_TYPE = Field(alias="_id")
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore")
     
     def get_id_type(self) -> Type:
