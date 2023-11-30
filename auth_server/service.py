@@ -6,13 +6,13 @@ import httpx
 import jwt
 from starlette.authentication import AuthenticationError
 
-from app.auth_server.dtos.auth_success_response import AuthSuccessResponse
-from app.auth_server.dtos.jwt_token import JWTToken
-from app.auth_server.dtos.open_id_profile import OpenIdProfile
-from app.auth_server.interfaces.password_authentication_provider import \
-    AuthUser
-from app.auth_server.user_session import UserSession
-from app.auth_server.user_session_repository import UserSessionRepository
+from auth_server.dtos.auth_success_response import AuthSuccessResponse
+from auth_server.dtos.jwt_token import JWTToken
+from auth_server.dtos.open_id_profile import OpenIdProfile
+from auth_server.interfaces.user_authentication_provider import (
+    UserAuthenticationProvider, UserInterface)
+from auth_server.user_session import UserSession
+from auth_server.user_session_repository import UserSessionRepository
 from app.user.service import UserService
 from app.user.user import User
 from nordic_realm.decorators.controller import Service
@@ -30,7 +30,7 @@ class AuthServerService:
     APP_SECRET_KEY : Annotated[str, Config("credentials.secret_app_key")]
 
     user_session_repo : UserSessionRepository
-    user_service : UserService
+    user_auth_provider : UserAuthenticationProvider
     
     
     def create_access_token(self, user_session : UserSession) -> str:
@@ -90,10 +90,10 @@ class AuthServerService:
         return profile
 
 
-    def get_or_create_user_by_openid(self, profile : OpenIdProfile, login_method : str) -> User:
-        user = self.user_service.find_user_by_email(profile.email)
+    def get_or_create_user_by_openid(self, profile : OpenIdProfile, login_method : str) -> UserInterface:
+        user = self.user_auth_provider.get_user_by_email(profile.email)
         if user is None:
-            return self.user_service.create(profile.name, profile.email)
+            return self.user_auth_provider.create_user(profile)
         return user
     
     def _decode_token(self, encoded_token : str) -> JWTToken:
@@ -130,4 +130,31 @@ class AuthServerService:
             access_token=new_access_token,
             refresh_token=new_refresh_token
         )
+    
+    def authenticate_by_password(self, username : str, plaintext_password : str, user_agent : str):
         
+        auth_user = self.user_auth_provider.authenticate_by_password(username, plaintext_password)
+        
+        user_session = self.create_session(auth_user.identity, user_agent)
+        auth_jwt = self.create_access_token(user_session)
+        refresh_jwt = self.create_refresh_token(user_session)
+
+        return AuthSuccessResponse(
+            access_token=auth_jwt,
+            refresh_token=refresh_jwt
+        )
+    
+    
+    def authenticate_by_google_sso(self, code : str, user_agent : str):
+        openid_profile = self.google_auth_api_code_exchange(code)
+        user = self.get_or_create_user_by_openid(openid_profile, "google")
+        
+        user_session = self.create_session(user.id, user_agent)
+        auth_jwt = self.create_access_token(user_session)
+        refresh_jwt = self.create_refresh_token(user_session)
+
+        return AuthSuccessResponse(
+            access_token=auth_jwt,
+            refresh_token=refresh_jwt
+        )
+    

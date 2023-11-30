@@ -11,11 +11,12 @@ Log()
 started = False
 ApplicationContext(app, True)
 
+DIScanner().scan("auth_server")
 DIScanner().scan("app")
 add_controllers()
 ApplicationContext.get().singleton_store.register(ApplicationContext.get().mongo_conns.get(None))
 
-from app.auth_server.middleware.security_middleware import OAuthSecurityMiddleware
+from auth_server.middleware.security_middleware import OAuthSecurityMiddleware
 OAuthSecurityMiddleware.install_middleware()
 
 def run_app():

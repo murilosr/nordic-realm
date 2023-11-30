@@ -7,9 +7,9 @@ from starlette.authentication import (AuthCredentials, AuthenticationBackend,
                                       AuthenticationError,
                                       UnauthenticatedUser, BaseUser)
 from starlette.middleware.authentication import AuthenticationMiddleware
-from app.auth_server.dtos.jwt_token import JWTToken
-from app.auth_server.interfaces.password_authentication_provider import AuthUser
-from app.auth_server.user_session_repository import UserSessionRepository
+from auth_server.dtos.jwt_token import JWTToken
+from auth_server.interfaces.user_authentication_provider import AuthUser
+from auth_server.user_session_repository import UserSessionRepository
 from app.user.repository import UserRepository
 
 from nordic_realm.decorators.controller import Component

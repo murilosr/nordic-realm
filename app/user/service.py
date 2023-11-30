@@ -1,6 +1,6 @@
 import random
 from uuid import uuid4
-from app.auth_server.interfaces.password_hash_provider import PasswordHashProvider
+from auth_server.interfaces.password_hash_provider import PasswordHashProvider
 from app.user.repository import UserRepository
 from app.user.user import User
 from nordic_realm.decorators.controller import Service
