@@ -1,6 +1,8 @@
+from datetime import datetime
 import logging
 from inspect import isclass
-from typing import Annotated, Generic, Optional, Type, TypeVar, ClassVar
+import time
+from typing import Annotated, Any, Generic, Optional, Type, TypeVar, ClassVar, Dict
 from typing_extensions import _AnnotatedAlias
 
 from nordic_realm.application import ApplicationContext
@@ -13,15 +15,25 @@ log = logging.getLogger("nordic_realm.di")
 
 class DIInjector(Generic[T]):
     
-    def __init__(self, app_context : Optional[ApplicationContext] = None):
+    def __init__(self, app_context : Optional[ApplicationContext] = None, use_cache : bool = True):
         self.app_context = app_context if app_context is not None else ApplicationContext.get()
+        self._use_cache = use_cache
+        self._obj_cache : Dict[str, Any] = {}
         
     @classmethod
     def _get_name(cls, clz: Type) -> str:
         return f"{clz.__module__}:{clz.__name__}"
     
+    def _is_cached(self, class_name : str) -> Any:
+        return class_name in self._obj_cache
+    
+    def _set_cache(self, class_name : str, obj : Any):
+        if(self._use_cache):
+            self._obj_cache[class_name] = obj
+    
     def _get_object(self, annotation_type : Type):
         _clazz : Type
+        
         if(isinstance(annotation_type, Annotated)):
             log.debug(f"{annotation_type} is annotated")
             _clazz : Type = annotation_type.__args__[0]
@@ -43,10 +55,15 @@ class DIInjector(Generic[T]):
         else:
             raise Exception(f"not supposed to be here {annotation_type}")
         
+        clazz_name = self._get_name(_clazz)
+        if self._use_cache and self._is_cached(clazz_name):
+            return self._obj_cache[clazz_name]
+        
         # Check if it is singleton
         try:
             _singleton_obj = self.app_context.singleton_store.get(_clazz)
             log.debug(f"{annotation_type} is a singleton")
+            self._set_cache(clazz_name, _singleton_obj)
             return _singleton_obj
         except ComponentNotRegistered:
             log.debug(f"{annotation_type} not a singleton")
@@ -58,11 +75,13 @@ class DIInjector(Generic[T]):
         except ComponentNotRegistered as err:
             log.debug(f"{annotation_type} not a component")
             raise err
+        
         _new_subobject = self.instance(_clazz)
         
         if(hasattr(_new_subobject, "_post_init") and callable(_new_subobject._post_init)): # type: ignore
             _new_subobject._post_init() # type: ignore
         
+        self._set_cache(clazz_name, _new_subobject)
         return _new_subobject
             
     

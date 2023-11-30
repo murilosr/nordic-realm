@@ -42,7 +42,7 @@ class ComponentStore(Generic[T]):
         try:
             return self._store[_name]
         except KeyError:
-            raise ComponentNotRegistered()
+            raise ComponentNotRegistered(clazz.__name__)
 
     # def get(self):
     #     return self._store
