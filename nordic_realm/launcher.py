@@ -17,7 +17,9 @@ add_controllers()
 ApplicationContext.get().singleton_store.register(ApplicationContext.get().mongo_conns.get(None))
 
 from auth_server.middleware.security_middleware import OAuthSecurityMiddleware
+from nordic_realm.fastapi_server.exception_handler import FastAPIExceptionHandler
 OAuthSecurityMiddleware.install_middleware()
+FastAPIExceptionHandler.install_exception_handler()
 
 def run_app():
     global started
