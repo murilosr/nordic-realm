@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from nordic_realm.fastapi_server.app import app
 
 from nordic_realm.di import ComponentStore, ConfigStore, SingletonStore
 from nordic_realm.mongo import MongoConnections
@@ -40,3 +41,5 @@ class ApplicationContext:
             name=None,
             params=self._get_mongo_connection_config()
         )
+
+ApplicationContext(app, True)

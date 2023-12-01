@@ -3,23 +3,23 @@ import uvicorn
 from nordic_realm.application.context import ApplicationContext
 from nordic_realm.di.scanner import DIScanner
 from nordic_realm.log import Log
+from auth_server.middleware.security_middleware import OAuthSecurityMiddleware
+from nordic_realm.fastapi_server.exception_handler import FastAPIExceptionHandler
 
 from .fastapi_server.add_controllers import add_controllers
-from .fastapi_server.app import app
 
 Log()
 started = False
-ApplicationContext(app, True)
 
 DIScanner().scan("auth_server")
 DIScanner().scan("app")
 add_controllers()
 ApplicationContext.get().singleton_store.register(ApplicationContext.get().mongo_conns.get(None))
 
-from auth_server.middleware.security_middleware import OAuthSecurityMiddleware
-from nordic_realm.fastapi_server.exception_handler import FastAPIExceptionHandler
 OAuthSecurityMiddleware.install_middleware()
 FastAPIExceptionHandler.install_exception_handler()
+
+app = ApplicationContext.get().fastapi_app
 
 def run_app():
     global started
