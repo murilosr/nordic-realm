@@ -1,5 +1,4 @@
 from datetime import timedelta
-from os import name
 from typing import Annotated
 
 import httpx
@@ -13,8 +12,6 @@ from auth_server.interfaces.user_authentication_provider import (
     UserAuthenticationProvider, UserInterface)
 from auth_server.user_session import UserSession
 from auth_server.user_session_repository import UserSessionRepository
-from app.user.service import UserService
-from app.user.user import User
 from nordic_realm.decorators.controller import Service
 from nordic_realm.di.annotations import Config
 
@@ -37,7 +34,7 @@ class AuthServerService:
                 "type": "access",
                 "sid": str(user_session.id),
                 "tid": user_session.access_token_tid,
-                "exp": user_session.created_dt + timedelta(hours=1)
+                "exp": user_session.access_token_expiry_dt
             },
             key=self.APP_SECRET_KEY,
             algorithm="HS256"
@@ -51,7 +48,7 @@ class AuthServerService:
                 "type": "refresh",
                 "sid": str(user_session.id),
                 "tid": user_session.refresh_token_tid,
-                "exp": user_session.expiry_dt
+                "exp": user_session.refresh_token_expiry_dt
             },
             key=self.APP_SECRET_KEY,
             algorithm="HS256"
@@ -78,15 +75,17 @@ class AuthServerService:
         if "id_token" not in response_data:
             raise Exception(f"Request with Google API failed. Received data: {response_data}")
 
-        profile = OpenIdProfile(**jwt.decode(
-            jwt=response_data["id_token"],
-            options={"verify_signature": False}
+        profile = OpenIdProfile(
+            **jwt.decode(
+                jwt=response_data["id_token"],
+                options={"verify_signature": False}
+            )
         )
-                                )
+
         return profile
 
     def get_or_create_user_by_openid(self, profile: OpenIdProfile, login_method: str) -> UserInterface:
-        user = self.user_auth_provider.get_user_by_email(profile.email)
+        user = self.user_auth_provider.find_user_by_email(profile.email)
         if user is None:
             return self.user_auth_provider.create_user(profile)
         return user
@@ -130,15 +129,6 @@ class AuthServerService:
         auth_user = self.user_auth_provider.authenticate_by_password(username, plaintext_password)
 
         user_session = self.create_session(auth_user.identity, user_agent)
-        auth_jwt = self.create_access_token(user_session)
-        refresh_jwt = self.create_refresh_token(user_session)
-
-        return AuthSuccessResponse(
-            access_token=auth_jwt,
-            refresh_token=refresh_jwt
-        )
-
-    def _get_auth_success_response(self, user_session : UserSession):
         auth_jwt = self.create_access_token(user_session)
         refresh_jwt = self.create_refresh_token(user_session)
 

@@ -3,26 +3,29 @@ from typing import Any, Dict, List
 
 import yaml
 
-def _get_value_from_dict_path_internal(_d : Dict[str, Any], _k : str) -> Any:
+
+def _get_value_from_dict_path_internal(_d: Dict[str, Any], _k: str) -> Any:
     return _d.get(_k)
 
-def get_value_from_dict_path(path : str, initial : Dict[str, Any]) -> Any:
+
+def get_value_from_dict_path(path: str, initial: Dict[str, Any]) -> Any:
     return reduce(_get_value_from_dict_path_internal, path.split('.'), initial)
+
 
 class ConfigStore:
 
-    def __init__(self, files : List[str] | None = None):
+    def __init__(self, files: List[str] | None = None):
         self._files = files if files is not None else ["./config.yaml", "./secrets.yaml"]
         self._store = self._read_files()
 
     def _read_files(self) -> Dict[str, Any]:
-        _store : Dict[str, Any] = {}
+        _store: Dict[str, Any] = {}
         for _filename in self._files:
             with open(_filename, 'rt') as file:
                 _store.update(yaml.safe_load(file))
         return _store
-    
-    def get(self, path : str) -> Any:
+
+    def get(self, path: str) -> Any:
         try:
             return get_value_from_dict_path(path, self._store)
         except (TypeError, KeyError):

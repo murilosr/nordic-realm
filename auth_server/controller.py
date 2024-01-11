@@ -1,11 +1,10 @@
 import logging
 from typing import Annotated
 
-from fastapi import Body, Header, Query
-
 from auth_server.dtos.password_authentication_body import \
     PasswordAuthenticationBodyDto
 from auth_server.service import AuthServerService
+from fastapi import Body, Header, Query
 from nordic_realm.decorators.controller import Controller, Get, Post
 
 
@@ -22,7 +21,8 @@ class AuthServerController:
         )
 
     @Post("/token/refresh", public=True)
-    def refresh_token(self, refresh_token: Annotated[str, Body(embed=True, alias="refreshToken", validation_alias="refreshToken")]):
+    def refresh_token(self, refresh_token: Annotated[
+        str, Body(embed=True, alias="refreshToken", validation_alias="refreshToken")]):
         return self.auth_service.use_refresh_token(
             refresh_token
         )

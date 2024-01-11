@@ -27,8 +27,12 @@ ID_TYPE = TypeVar('ID_TYPE', default=PyObjectId)
 
 class MongoBaseModel(BaseModel, Generic[ID_TYPE]):
     id: ID_TYPE = Field(alias="_id")
-    model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore", populate_by_name=True,
-                              alias_generator=to_camel)
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        extra="ignore",
+        alias_generator=to_camel,
+        populate_by_name=True
+    )
 
     def get_id_type(self) -> Type:
         return self.__orig_bases__[0].__args__[0]  # type: ignore

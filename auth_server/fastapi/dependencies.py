@@ -2,7 +2,6 @@ import fastapi
 from starlette.authentication import AuthenticationError
 
 from app.user.repository import UserRepository
-from app.user.service import UserService
 from app.user.user import User
 from nordic_realm.di.injector import DIInjector
 from nordic_realm.mongo import DocumentNotFound
