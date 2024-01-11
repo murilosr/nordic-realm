@@ -108,5 +108,5 @@ class DIInjector(Generic[T]):
         if _is_root:
             if hasattr(_new_obj, "_post_init") and callable(_new_obj._post_init):  # type: ignore
                 _new_obj._post_init()  # type: ignore
-        
+
         return _new_obj

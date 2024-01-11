@@ -15,7 +15,6 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
     _COLLECTION: Annotated[str, ClassVar]
 
     def _post_init(self):
-        print("executed postinit")
         self._MONGO = self._MONGO_CLIENT[self._DB][self._COLLECTION]
 
     def get_all(self) -> List[MODEL]:
