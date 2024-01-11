@@ -86,7 +86,9 @@ class DIInjector(Generic[T]):
             
     
     def instance(self, clazz : Type[T], _new_obj : T | None = None) -> T: # type: ignore
+        _is_root = False
         if(_new_obj is None):
+            _is_root = True
             log.debug(f"Injector: instancing a new object of type {clazz}")
             _new_obj : T = ApplicationContext.get().component_store.get(clazz)()
         
@@ -104,6 +106,10 @@ class DIInjector(Generic[T]):
         
         for _parent_class in clazz.mro()[1:]:
             self.instance(_parent_class, _new_obj) # type: ignore
+
+        if _is_root:
+            if hasattr(_new_obj, "_post_init") and callable(_new_obj._post_init):  # type: ignore
+                _new_obj._post_init()  # type: ignore
         
         return _new_obj
     

@@ -3,6 +3,7 @@ from typing import Type
 from bson import ObjectId
 from pydantic import (AfterValidator, BaseModel, ConfigDict, Field,
                       PlainSerializer, WithJsonSchema)
+from pydantic.alias_generators import to_camel
 from typing_extensions import Annotated, Any, Dict, Generic, TypeVar, Union
 
 
@@ -13,6 +14,7 @@ def validate_object_id(v: Any) -> ObjectId:
         return ObjectId(v)
     raise ValueError("Invalid ObjectId")
 
+
 PyObjectId = Annotated[
     Union[str, ObjectId],
     AfterValidator(validate_object_id),
@@ -22,12 +24,16 @@ PyObjectId = Annotated[
 
 ID_TYPE = TypeVar('ID_TYPE', default=PyObjectId)
 
+
 class MongoBaseModel(BaseModel, Generic[ID_TYPE]):
-    id : ID_TYPE = Field(alias="_id")
-    model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore")
-    
+    id: ID_TYPE = Field(alias="_id")
+    model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore", populate_by_name=True,
+                              alias_generator=to_camel)
+
     def get_id_type(self) -> Type:
-        return self.__orig_bases__[0].__args__[0] # type: ignore
+        return self.__orig_bases__[0].__args__[0]  # type: ignore
 
     def to_bson(self) -> Dict[str, Any]:
-        return self.model_dump(by_alias=True)
+        _obj = self.model_dump(by_alias=False, exclude_none=True)
+        _obj["_id"] = _obj.pop("id")
+        return _obj

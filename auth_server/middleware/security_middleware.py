@@ -59,7 +59,7 @@ class OAuthSecurityMiddleware(AuthenticationBackend):
         
         user = self.user_repo.get_by_id(session.user_id)
 
-        return AuthCredentials([]), AuthUser(id=session.user_id, username=user.name)
+        return AuthCredentials([]), AuthUser(id=session.user_id, username=user.email)
     
     def _return_unauthenticated_credentials(self):
         return AuthCredentials([]), UnauthenticatedUser()
