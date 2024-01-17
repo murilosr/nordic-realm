@@ -25,6 +25,19 @@ PyObjectId = Annotated[
 ID_TYPE = TypeVar('ID_TYPE', default=PyObjectId)
 
 
+def remove_is_ref(root_dict: dict[str, Any]):
+    if "IS_REF" in root_dict:
+        root_dict.pop("IS_REF")
+
+    for _k, _v in root_dict.items():
+        if isinstance(_v, dict):
+            remove_is_ref(_v)
+        elif isinstance(_v, list):
+            for _item in _v:
+                if isinstance(_item, dict):
+                    remove_is_ref(_item)
+
+
 class MongoBaseModel(BaseModel, Generic[ID_TYPE]):
     id: ID_TYPE = Field(alias="_id")
     model_config = ConfigDict(
@@ -40,4 +53,6 @@ class MongoBaseModel(BaseModel, Generic[ID_TYPE]):
     def to_bson(self) -> Dict[str, Any]:
         _obj = self.model_dump(by_alias=False, exclude_none=True)
         _obj["_id"] = _obj.pop("id")
+        remove_is_ref(_obj)
+
         return _obj
