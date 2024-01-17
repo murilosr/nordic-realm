@@ -3,16 +3,17 @@ from typing import Any
 
 from yaml import safe_load
 
-orig_factory : Any = None
+orig_factory: Any = None
+
 
 class Log:
-    
+
     def __init__(self):
         with open('./config.yaml', 'rt') as f:
             self._config = safe_load(f.read())["logging"]
         logging.config.dictConfig(self._config)
         global orig_factory
-        if(orig_factory is None):
+        if (orig_factory is None):
             orig_factory = logging.getLogRecordFactory()
 
             def record_factory(*args, **kwargs):
@@ -23,3 +24,7 @@ class Log:
                 return record
 
             logging.setLogRecordFactory(record_factory)
+
+    @property
+    def config(self):
+        return self._config
