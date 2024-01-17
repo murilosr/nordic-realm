@@ -1,7 +1,7 @@
 import uvicorn
 
 from auth_server.middleware.security_middleware import OAuthSecurityMiddleware
-from nordic_realm.application.context import ApplicationContext
+from nordic_realm.application import ApplicationContext, bootstrap_application_context
 from nordic_realm.di.scanner import DIScanner
 from nordic_realm.fastapi_server.exception_handler import FastAPIExceptionHandler
 from nordic_realm.log import Log
@@ -9,6 +9,8 @@ from .fastapi_server.add_controllers import add_controllers
 
 Log()
 started = False
+
+bootstrap_application_context()
 
 DIScanner().scan("auth_server")
 DIScanner().scan("app")

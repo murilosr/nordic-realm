@@ -54,7 +54,6 @@ class OAuthSecurityMiddleware(AuthenticationBackend):
         if session is None:
             raise AuthenticationError("Session revoked")
 
-        print(session.access_token_tid, token.tid)
         if session.access_token_tid != token.tid:
             raise AuthenticationError("Bad access_token_id")
 

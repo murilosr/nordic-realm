@@ -17,6 +17,7 @@ class ConfigStore:
     def __init__(self, files: List[str] | None = None):
         self._files = files if files is not None else ["./config.yaml", "./secrets.yaml"]
         self._store = self._read_files()
+        self._overrides = {}
 
     def _read_files(self) -> Dict[str, Any]:
         _store: Dict[str, Any] = {}
@@ -26,7 +27,13 @@ class ConfigStore:
         return _store
 
     def get(self, path: str) -> Any:
+        if path in self._overrides:
+            return self._overrides[path]
+
         try:
             return get_value_from_dict_path(path, self._store)
         except (TypeError, KeyError):
             raise KeyError(f"{path} not found in config.yaml")
+
+    def register_override(self, key: str, value: Any):
+        self._overrides[key] = value

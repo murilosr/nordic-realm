@@ -42,11 +42,6 @@ def Service(*args, **kwargs):
 
 
 def Repository(collection: str, db: str | None = None, *args, **kwargs):
-    if (db is None):
-        db = ApplicationContext.get().config_store.get("mongodb.db")
-        if not isinstance(db, str):
-            raise ValueError("Provide a database via 'db' parameter or via mongodb.db in secrets.yaml")
-
     def wrapper(*args2, **kwargs2):
         Component()(args2[0])
         args2[0]._NR_type = "repository"
