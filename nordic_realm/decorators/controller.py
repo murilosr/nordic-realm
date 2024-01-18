@@ -2,8 +2,6 @@ from http import HTTPStatus
 
 from typing_extensions import Any, Callable, Literal, Type
 
-from nordic_realm.application.context import ApplicationContext
-
 
 def Component(*args, **kwargs):
     def wrapper(*args2, **kwargs2):
@@ -52,7 +50,7 @@ def Repository(collection: str, db: str | None = None, *args, **kwargs):
     return wrapper
 
 
-def MethodRouteMap(method: Literal["GET"] | Literal["POST"]):
+def MethodRouteMap(method: Literal["GET", "POST", "PUT", "DELETE"]):
     def outer_wrapper(
             path: str,
             response_model: Type = None,
@@ -90,3 +88,21 @@ def Post(
         public: bool = False
 ):
     return MethodRouteMap("POST")(path, response_model, response_code, public)
+
+
+def Put(
+        path: str,
+        response_model: Type = None,
+        response_code: HTTPStatus | int | None = None,
+        public: bool = False
+):
+    return MethodRouteMap("PUT")(path, response_model, response_code, public)
+
+
+def Delete(
+        path: str,
+        response_model: Type = None,
+        response_code: HTTPStatus | int | None = None,
+        public: bool = False
+):
+    return MethodRouteMap("DELETE")(path, response_model, response_code, public)
