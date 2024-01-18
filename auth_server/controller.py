@@ -4,7 +4,7 @@ from typing import Annotated
 from auth_server.dtos.password_authentication_body import \
     PasswordAuthenticationBodyDto
 from auth_server.service import AuthServerService
-from fastapi import Body, Header, Query
+from fastapi import Body, Header
 from nordic_realm.decorators.controller import Controller, Get, Post
 
 
@@ -27,8 +27,9 @@ class AuthServerController:
             refresh_token
         )
 
-    @Get("/google", public=True)
-    def google_oauth_code_exchange(self, code: Annotated[str, Query()], user_agent: Annotated[str, Header()]):
+    @Post("/google", public=True)
+    def google_oauth_code_exchange(self, code: Annotated[str, Body(embed=True)],
+                                   user_agent: Annotated[str, Header()]):
         return self.auth_service.authenticate_by_google_sso(
             code,
             user_agent
