@@ -10,7 +10,7 @@ IncEx: TypeAlias = 'set[int] | set[str] | dict[int, Any] | dict[str, Any] | None
 
 
 class MongoRefModel(BaseModel, Generic[REF_MODEL, ID_TYPE]):
-    id: ID_TYPE
+    id: ID_TYPE = Field(validation_alias="_id", serialization_alias="id")
     IS_REF: Literal[True] = Field(default=True, alias="__ref")
 
     model_config = ConfigDict(

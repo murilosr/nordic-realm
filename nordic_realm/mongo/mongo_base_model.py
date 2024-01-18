@@ -28,6 +28,7 @@ ID_TYPE = TypeVar('ID_TYPE', default=PyObjectId)
 def remove_is_ref(root_dict: dict[str, Any]):
     if "IS_REF" in root_dict:
         root_dict.pop("IS_REF")
+        root_dict["_id"] = root_dict.pop("id")
 
     for _k, _v in root_dict.items():
         if isinstance(_v, dict):
@@ -39,7 +40,7 @@ def remove_is_ref(root_dict: dict[str, Any]):
 
 
 class MongoBaseModel(BaseModel, Generic[ID_TYPE]):
-    id: ID_TYPE = Field(alias="_id")
+    id: ID_TYPE = Field(validation_alias="_id", serialization_alias="id")
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         extra="ignore",

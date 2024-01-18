@@ -36,7 +36,7 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
         self._MONGO = self._MONGO_CLIENT[db][self._COLLECTION]
 
     def get_all(self) -> List[MODEL]:
-        return [self._get_model_type().model_construct(**_result) for _result in self._MONGO.find({})]
+        return [self._get_model_type()(**_result) for _result in self._MONGO.find({})]
 
     def get_by_id(self, id: ID_TYPE) -> MODEL:
         if self._get_id_type() == PyObjectId and isinstance(id, str):
@@ -46,7 +46,7 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
             raise DocumentNotFound("Document not found")
         if len(_result) == 2:
             raise MultipleDocumentFound("Multiple document found")
-        return self._get_model_type().model_construct(**_result[0])
+        return self._get_model_type()(**_result[0])
 
     def find_by_id(self, id: ID_TYPE) -> Optional[MODEL]:
         if self._get_id_type() == PyObjectId and isinstance(id, str):
@@ -56,7 +56,7 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
             return None
         if len(_result) == 2:
             raise MultipleDocumentFound("Multiple document found")
-        return self._get_model_type().model_construct(**_result[0])
+        return self._get_model_type()(**_result[0])
 
     def save(self, entity: MODEL) -> MODEL:
         if getattr(entity, "id", None) is None:
@@ -76,3 +76,14 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
 
     def delete(self, id: ID_TYPE):
         self._MONGO.delete_one({"_id": id})
+
+    def _construct_response(self, result: Any) -> List[MODEL]:
+        return [self._get_model_type()(**_item) for _item in result]
+
+    def _construct_single_response(self, result: Any) -> MODEL | None:
+        _result = list(result)
+        if len(_result) == 0:
+            return None
+        if len(_result) == 2:
+            raise MultipleDocumentFound("Multiple document found")
+        return self._get_model_type()(**_result[0])
