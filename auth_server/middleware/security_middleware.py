@@ -71,6 +71,10 @@ class OAuthSecurityMiddleware(AuthenticationBackend):
     async def authenticate(self, conn):
         app = conn.scope["app"]  # type: FastAPI
 
+        # Needed for CORS
+        if conn.scope["method"] == "OPTIONS":
+            return self._return_unauthenticated_credentials()
+
         path = conn.scope["path"]
         slash_normalized_path: str
         if path.endswith("/"):
