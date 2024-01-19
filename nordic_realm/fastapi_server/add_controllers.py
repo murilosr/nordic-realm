@@ -8,9 +8,17 @@ from nordic_realm.di.injector import DIInjector
 
 
 def instance_obj_endpoint(clz, method):
-    def wrapper(*args, **kwargs):
+    def wrapper_sync(*args, **kwargs):
         c = DIInjector().instance(clz)
         return getattr(c, method.__name__)(*args, **kwargs)
+
+    async def wrapper_async(*args, **kwargs):
+        c = DIInjector().instance(clz)
+        return await getattr(c, method.__name__)(*args, **kwargs)
+
+    wrapper = wrapper_sync
+    if inspect.iscoroutinefunction(method):
+        wrapper = wrapper_async
 
     method_sig = inspect.signature(method)
     new_parameters = [p for (p_name, p,) in method_sig.parameters.items() if p_name != "self"]

@@ -50,7 +50,7 @@ def Repository(collection: str, db: str | None = None, *args, **kwargs):
     return wrapper
 
 
-def MethodRouteMap(method: Literal["GET", "POST", "PUT", "DELETE"]):
+def MethodRouteMap(method: Literal["GET", "POST", "PUT", "PATCH", "DELETE"]):
     def outer_wrapper(
             path: str,
             response_model: Type = None,
@@ -97,6 +97,15 @@ def Put(
         public: bool = False
 ):
     return MethodRouteMap("PUT")(path, response_model, response_code, public)
+
+
+def Patch(
+        path: str,
+        response_model: Type = None,
+        response_code: HTTPStatus | int | None = None,
+        public: bool = False
+):
+    return MethodRouteMap("PATCH")(path, response_model, response_code, public)
 
 
 def Delete(
