@@ -8,12 +8,12 @@ from nordic_realm.mongo.exceptions import DocumentNotFound, MultipleDocumentFoun
 from nordic_realm.mongo.mongo_base_model import MongoBaseModel, PyObjectId
 
 if TYPE_CHECKING:
-    from nordic_realm.application.context import ApplicationContext as _ApplicationContext
+    from nordic_realm.application import ApplicationContext
 
 MODEL = TypeVar('MODEL', bound=MongoBaseModel[Any])
 ID_TYPE = TypeVar('ID_TYPE')
 
-ApplicationContext: "_ApplicationContext" = None  # type: ignore
+_ApplicationContext: Optional["ApplicationContext"] = None
 
 
 class MongoRepository(Generic[MODEL, ID_TYPE]):
@@ -22,14 +22,14 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
     _COLLECTION: Annotated[str, ClassVar]
 
     def _post_init(self):
-        global ApplicationContext
+        global _ApplicationContext
 
-        if ApplicationContext is None:
-            ApplicationContext = import_module("nordic_realm.application.context").ApplicationContext
+        if _ApplicationContext is None:
+            _ApplicationContext = import_module("nordic_realm.application.context").ApplicationContext
 
         db = self.__class__._DB
         if db is None:
-            db = ApplicationContext.get().config_store.get("mongodb.db")
+            db = _ApplicationContext.get().config_store.get("mongodb.db")
             if not isinstance(db, str):
                 raise ValueError("Provide a database via 'db' parameter or via mongodb.db in secrets.yaml")
 
