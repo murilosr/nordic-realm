@@ -8,16 +8,16 @@ from nordic_realm.di.injector import DIInjector
 
 
 def instance_obj_endpoint(clz, method):
-    def wrapper_sync(*args, **kwargs):
+    def wrapper_sync(*args, **kwargs):  # pragma: nocover
         c = DIInjector().instance(clz)
         return getattr(c, method.__name__)(*args, **kwargs)
 
-    async def wrapper_async(*args, **kwargs):
+    async def wrapper_async(*args, **kwargs):  # pragma: nocover
         c = DIInjector().instance(clz)
         return await getattr(c, method.__name__)(*args, **kwargs)
 
     wrapper = wrapper_sync
-    if inspect.iscoroutinefunction(method):
+    if inspect.iscoroutinefunction(method):  # pragma: nocover
         wrapper = wrapper_async
 
     method_sig = inspect.signature(method)
@@ -53,11 +53,17 @@ def add_controllers():
                     full_path = f"{base_path}{method_path}"
                     method_http_method = _controller_method._NR_method
                     response_status_code = _controller_method._NR_response_code
+
+                    extra_kwargs = {}
+                    if hasattr(_controller_method, "_NR_response_model"):
+                        extra_kwargs["response_model"] = _controller_method._NR_response_model
+
                     app.add_api_route(
                         path=full_path,
                         endpoint=instance_obj_endpoint(_v, _controller_method),
                         methods=[method_http_method, "OPTIONS"],
-                        status_code=response_status_code
+                        status_code=response_status_code,
+                        **extra_kwargs
                     )
                     if (hasattr(_controller_method,
                                 "_NR_public_path") and _controller_method._NR_public_path):

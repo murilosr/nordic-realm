@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
-from uuid import uuid4
+from typing import TypeAlias, Annotated
 
-from bson import ObjectId
 from pydantic import Field
 
-from nordic_realm.mongo.mongo_base_model import MongoBaseModel, PyObjectId
+from nordic_realm.mongo.mongo_base_model import MongoBaseModel
+from nordic_realm.utils import generate_id
+from nordic_realm.utils.pydantic.types import DateTimeUTCNow
 
 
 def refresh_expiry_dt_factory():
@@ -16,22 +17,25 @@ def access_expiry_dt_factory():
 
 
 def token_factory():
-    return uuid4().hex + uuid4().hex
+    return generate_id(32)
 
 
-class UserSession(MongoBaseModel[PyObjectId]):
+TokenType: TypeAlias = Annotated[str, Field(default_factory=token_factory)]
+
+
+class UserSession(MongoBaseModel[str]):
     user_id: str
     user_agent: str
-    access_token_tid: str = Field(default_factory=token_factory)
-    refresh_token_tid: str = Field(default_factory=token_factory)
-    created_dt: datetime = Field(default_factory=datetime.utcnow)
+    access_token_tid: TokenType
+    refresh_token_tid: TokenType
+    created_dt: DateTimeUTCNow
     access_token_expiry_dt: datetime = Field(default_factory=access_expiry_dt_factory)
     refresh_token_expiry_dt: datetime = Field(default_factory=refresh_expiry_dt_factory)
 
     @staticmethod
     def create(user_id: str, user_agent: str) -> "UserSession":
         return UserSession(
-            _id=str(ObjectId()),
+            id=generate_id(),
             user_id=user_id,
             user_agent=user_agent
         )

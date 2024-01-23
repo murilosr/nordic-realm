@@ -1,4 +1,7 @@
 import uvicorn
+from starlette.authentication import AuthenticationError
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from auth_server.middleware.security_middleware import OAuthSecurityMiddleware
 from nordic_realm.application import ApplicationContext, bootstrap_application_context

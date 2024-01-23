@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(debug=True)
+app = FastAPI()
 
 origins = [
     "http://localnet.thorson.tech:3000",

@@ -16,4 +16,4 @@ class MongoConnections:
     def register(self, name: str | None, params: Dict[Any, Any]):
         if name is None:
             name = "__default"
-        self._connections[name] = MongoClient(**params)
+        self._connections[name] = MongoClient(**params, tz_aware=True)

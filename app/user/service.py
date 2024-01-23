@@ -1,10 +1,9 @@
-from uuid import uuid4
-
 from app.user.repository import UserRepository
 from app.user.user import User
 from auth_server.interfaces.password_hash_provider import PasswordHashProvider
 from nordic_realm.decorators.controller import Service
 from nordic_realm.mongo.exceptions import DocumentNotFound
+from nordic_realm.utils import generate_id
 
 
 @Service()
@@ -24,7 +23,7 @@ class UserService:
     def create(self, name: str, email: str) -> User:
         return self.user_repo.save(
             User(
-                _id=uuid4().hex,
+                id=generate_id(),
                 name=name,
                 email=email,
                 password=self.password_hash_provider.hash("123456")

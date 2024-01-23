@@ -7,6 +7,7 @@ from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, Invalid
 from starlette.authentication import AuthenticationError
 
 from nordic_realm.application.context import ApplicationContext
+from nordic_realm.mongo import DocumentNotFound, MultipleDocumentFound
 
 
 def http_exception_proxy(status_code: int):
@@ -30,7 +31,7 @@ def http_exception_proxy(status_code: int):
     return _internal_proxy
 
 
-class FastAPIExceptionHandler():
+class FastAPIExceptionHandler:
 
     @staticmethod
     def install_exception_handler():
@@ -41,8 +42,9 @@ class FastAPIExceptionHandler():
 
         self.app = self.app_context.fastapi_app
 
-        self._add_generic_errors()
         self._add_jwt_errors()
+        self._add_db_errors()
+        self._add_generic_errors()
 
     def _add_batch(self, exceptions: list[Type[Exception]], status_code: int):
         for _e in exceptions:
@@ -50,6 +52,10 @@ class FastAPIExceptionHandler():
 
     def _add_generic_errors(self):
         self._add_batch([Exception, HTTPException], HTTPStatus.INTERNAL_SERVER_ERROR)
+
+    def _add_db_errors(self):
+        self._add_batch([DocumentNotFound], HTTPStatus.NOT_FOUND)
+        self._add_batch([MultipleDocumentFound], HTTPStatus.BAD_REQUEST)
 
     def _add_jwt_errors(self):
         self._add_batch([AuthenticationError, ExpiredSignatureError, InvalidSignatureError, InvalidTokenError],

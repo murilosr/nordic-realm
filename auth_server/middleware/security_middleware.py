@@ -14,6 +14,7 @@ from auth_server.interfaces.user_authentication_provider import AuthUser
 from auth_server.user_session_repository import UserSessionRepository
 from nordic_realm.decorators.controller import Component
 from nordic_realm.di.annotations import Config
+from nordic_realm.fastapi_server.exception_handler import http_exception_proxy
 
 
 @Component()
@@ -29,7 +30,8 @@ class OAuthSecurityMiddleware(AuthenticationBackend):
 
         ApplicationContext.get().fastapi_app.add_middleware(
             AuthenticationMiddleware,
-            backend=DIInjector().instance(OAuthSecurityMiddleware)
+            backend=DIInjector().instance(OAuthSecurityMiddleware),
+            on_error=http_exception_proxy(401)
         )
 
     def _decode_token(self, jwt_encoded: str) -> JWTToken:
@@ -43,7 +45,7 @@ class OAuthSecurityMiddleware(AuthenticationBackend):
     def _process_authorization(self, authorization_header: str | None, path_is_public: bool) -> tuple[
         AuthCredentials, BaseUser]:
         if authorization_header is None:
-            return self._raise_error_or_return_unauthenticated("Missing Authorization header", path_is_public)
+            self._raise_error_or_return_unauthenticated("Missing Authorization header", path_is_public)
 
         auth_split = authorization_header.split(" ")
         if (len(auth_split) != 2 or auth_split[0] != "Bearer"):
