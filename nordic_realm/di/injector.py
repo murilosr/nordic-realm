@@ -1,6 +1,6 @@
 import logging
 from inspect import isclass
-from typing import Annotated, Any, Generic, Optional, Type, TypeVar, ClassVar, Dict
+from typing import Annotated, Any, Generic, Type, TypeVar, ClassVar, Dict
 
 from typing_extensions import _AnnotatedAlias
 
@@ -14,7 +14,7 @@ log = logging.getLogger("nordic_realm.di")
 
 class DIInjector(Generic[T]):
 
-    def __init__(self, app_context: Optional[ApplicationContext] = None, use_cache: bool = True):
+    def __init__(self, app_context: ApplicationContext | None = None, use_cache: bool = True):
         self.app_context = app_context if app_context is not None else ApplicationContext.get()
         self._use_cache = use_cache
         self._obj_cache: Dict[str, Any] = {}
@@ -69,7 +69,7 @@ class DIInjector(Generic[T]):
             pass
 
         try:
-            _clazz = ApplicationContext.get().component_store.get(_clazz)
+            _clazz = self.app_context.component_store.get(_clazz)
             log.debug(f"{annotation_type} is a component")
         except ComponentNotRegistered as err:
             log.debug(f"{annotation_type} not a component")
@@ -88,7 +88,7 @@ class DIInjector(Generic[T]):
         if (_new_obj is None):
             _is_root = True
             log.debug(f"Injector: instancing a new object of type {clazz}")
-            _new_obj: T = ApplicationContext.get().component_store.get(clazz)()
+            _new_obj: T = self.app_context.component_store.get(clazz)()
 
         if (hasattr(clazz, "__annotations__")):
             for _ank, _anv in clazz.__annotations__.items():

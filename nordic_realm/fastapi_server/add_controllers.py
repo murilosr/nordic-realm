@@ -7,13 +7,13 @@ from nordic_realm.application.context import ApplicationContext
 from nordic_realm.di.injector import DIInjector
 
 
-def instance_obj_endpoint(clz, method):
+def instance_obj_endpoint(clz, method, context: ApplicationContext):
     def wrapper_sync(*args, **kwargs):  # pragma: nocover
-        c = DIInjector().instance(clz)
+        c = DIInjector(context).instance(clz)
         return getattr(c, method.__name__)(*args, **kwargs)
 
     async def wrapper_async(*args, **kwargs):  # pragma: nocover
-        c = DIInjector().instance(clz)
+        c = DIInjector(context).instance(clz)
         return await getattr(c, method.__name__)(*args, **kwargs)
 
     wrapper = wrapper_sync
@@ -28,10 +28,10 @@ def instance_obj_endpoint(clz, method):
     return wrapper
 
 
-def add_controllers():
-    app = ApplicationContext.get().fastapi_app
+def add_controllers(context: ApplicationContext):
+    app = context.fastapi_app
     app._NR_public_paths = [re.compile("/docs[$|/*$]"), re.compile("/openapi.json")]  # type: ignore
-    for _v in ApplicationContext.get().component_store._store.values():
+    for _v in context.component_store._store.values():
         if isinstance(_v, type):
             if "_NR_type" in _v.__dict__ and _v._NR_type == "controller":
                 base_path = _v._NR_path  # type: ignore
@@ -60,7 +60,7 @@ def add_controllers():
 
                     app.add_api_route(
                         path=full_path,
-                        endpoint=instance_obj_endpoint(_v, _controller_method),
+                        endpoint=instance_obj_endpoint(_v, _controller_method, context),
                         methods=[method_http_method, "OPTIONS"],
                         status_code=response_status_code,
                         **extra_kwargs

@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import List
 
-from nordic_realm.fastapi_server.app import app
+from fastapi import FastAPI
+
 from .context import ApplicationContext
 
 
@@ -22,9 +23,17 @@ def _bootstrap_mongo_connections(application_context: ApplicationContext):
     )
 
 
-def bootstrap_application_context(config_files: List[str | Path] | None = None):
+def bootstrap_application_context(
+        config_files: List[str | Path] | None = None,
+        fastapi_app: FastAPI | None = None,
+        set_global: bool = True
+):
     from ..mongo.connections import MongoConnections
     from ..di import ConfigStore, ComponentStore, SingletonStore
+
+    if fastapi_app is None:
+        from nordic_realm.fastapi_server.app import create_app
+        fastapi_app = create_app()
 
     config_store = ConfigStore(config_files)
     component_store = ComponentStore()
@@ -32,12 +41,15 @@ def bootstrap_application_context(config_files: List[str | Path] | None = None):
     mongo_conns = MongoConnections()
 
     application_context = ApplicationContext(
-        app,
+        fastapi_app,
         config_store,
         component_store,
         singleton_store,
         mongo_conns
     )
 
-    application_context.set_global()
+    if set_global:
+        application_context.set_global()
+
     _bootstrap_mongo_connections(application_context)
+    return application_context

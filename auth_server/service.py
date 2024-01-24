@@ -53,6 +53,15 @@ class AuthServerService:
             algorithm="HS256"
         )
 
+    def create_token_pack(self, user_session: UserSession) -> AuthSuccessResponse:
+        access_token = self.create_access_token(user_session)
+        refresh_token = self.create_refresh_token(user_session)
+
+        return AuthSuccessResponse(
+            access_token=access_token,
+            refresh_token=refresh_token
+        )
+
     def create_session(self, user_id: str, user_agent: str):
         return self.user_session_repo.save(UserSession.create(user_id, user_agent))
 

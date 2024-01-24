@@ -1,5 +1,6 @@
+import logging
 from re import Pattern
-from typing import Annotated
+from typing import Annotated, TYPE_CHECKING
 
 import jwt
 from fastapi import FastAPI
@@ -16,6 +17,11 @@ from nordic_realm.decorators.controller import Component
 from nordic_realm.di.annotations import Config
 from nordic_realm.fastapi_server.exception_handler import http_exception_proxy
 
+if TYPE_CHECKING:
+    from nordic_realm.application import ApplicationContext
+
+log = logging.getLogger("OAuthSecurityMiddleware")
+
 
 @Component()
 class OAuthSecurityMiddleware(AuthenticationBackend):
@@ -24,13 +30,12 @@ class OAuthSecurityMiddleware(AuthenticationBackend):
     APP_SECRET_KEY: Annotated[str, Config("credentials.secret_app_key")]
 
     @staticmethod
-    def install_middleware():
-        from nordic_realm.application import ApplicationContext
+    def install_middleware(app_context: "ApplicationContext"):
         from nordic_realm.di.injector import DIInjector
 
-        ApplicationContext.get().fastapi_app.add_middleware(
+        app_context.fastapi_app.add_middleware(
             AuthenticationMiddleware,
-            backend=DIInjector().instance(OAuthSecurityMiddleware),
+            backend=DIInjector(app_context).instance(OAuthSecurityMiddleware),
             on_error=http_exception_proxy(401)
         )
 
@@ -39,7 +44,8 @@ class OAuthSecurityMiddleware(AuthenticationBackend):
             return JWTToken(**jwt.decode(jwt=jwt_encoded, key=self.APP_SECRET_KEY, algorithms=["HS256"]))
         except jwt.exceptions.ExpiredSignatureError:
             raise AuthenticationError("Expired access token. Use refresh token")
-        except:
+        except Exception as e:
+            log.warning(f"Bad Authorization token: {type(e)} / {e}")
             raise AuthenticationError("Bad Authorization token")
 
     def _process_authorization(self, authorization_header: str | None, path_is_public: bool) -> tuple[

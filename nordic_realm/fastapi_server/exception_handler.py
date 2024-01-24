@@ -1,13 +1,15 @@
 from http import HTTPStatus
-from typing import Type
+from typing import Type, TYPE_CHECKING
 
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, InvalidTokenError
 from starlette.authentication import AuthenticationError
 
-from nordic_realm.application.context import ApplicationContext
 from nordic_realm.mongo import DocumentNotFound, MultipleDocumentFound
+
+if TYPE_CHECKING:
+    from nordic_realm.application.context import ApplicationContext
 
 
 def http_exception_proxy(status_code: int):
@@ -34,12 +36,11 @@ def http_exception_proxy(status_code: int):
 class FastAPIExceptionHandler:
 
     @staticmethod
-    def install_exception_handler():
-        FastAPIExceptionHandler()
+    def install_exception_handler(app_context: "ApplicationContext"):
+        FastAPIExceptionHandler(app_context)
 
-    def __init__(self, app_context: ApplicationContext | None = None):
-        self.app_context = app_context if app_context is not None else ApplicationContext.get()
-
+    def __init__(self, app_context: "ApplicationContext"):
+        self.app_context = app_context
         self.app = self.app_context.fastapi_app
 
         self._add_jwt_errors()

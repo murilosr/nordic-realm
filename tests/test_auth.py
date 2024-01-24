@@ -1,5 +1,5 @@
 # noinspection PyUnresolvedReferences
-from . import before_init, test_client
+from nordic_realm.test import *
 
 
 def test_fastapi_app(test_client):
