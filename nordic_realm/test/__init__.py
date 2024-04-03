@@ -56,7 +56,7 @@ def reset_database(before_init):
 
     yield
 
-    # ApplicationContext.get().mongo_conns.get().drop_database(db_name)
+    ApplicationContext.get().mongo_conns.get().drop_database(db_name)
     logging.info(f"Before_init ended. Dropping db: {db_name}\n\n")
 
 

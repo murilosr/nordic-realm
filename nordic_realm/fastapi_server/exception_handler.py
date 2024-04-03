@@ -11,6 +11,13 @@ from nordic_realm.mongo import DocumentNotFound, MultipleDocumentFound
 if TYPE_CHECKING:
     from nordic_realm.application.context import ApplicationContext
 
+cors_origins = [
+    "http://localnet.thorson.tech:3000",
+    "http://localhost:3000",
+    "http://localnet.thorson.tech:8080",
+    "http://localhost:8080",
+]
+
 
 def http_exception_proxy(status_code: int):
     def _internal_proxy(request: Request, exception: Exception):
@@ -23,12 +30,24 @@ def http_exception_proxy(status_code: int):
             status_code = exception.status_code
             message = exception.detail
 
-        return JSONResponse({
-            "status_code": status_code,
-            "exception": classname,
-            "detail": message
-        },
-            status_code=status_code)
+        request_origin = request.headers.get("origin", None)
+        headers = {}
+        if request_origin and request_origin in cors_origins:
+            headers = {
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Origin": request_origin,
+                "Access-Control-Allow-Methods": ", ".join(("DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT",))
+            }
+
+        return JSONResponse(
+            content={
+                "status_code": status_code,
+                "exception": classname,
+                "detail": message
+            },
+            status_code=status_code,
+            headers=headers
+        )
 
     return _internal_proxy
 

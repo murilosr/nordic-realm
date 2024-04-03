@@ -75,7 +75,7 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
         return self.__orig_bases__[0].__args__[1]  # type: ignore
 
     def delete(self, id: ID_TYPE):
-        self._MONGO.delete_one({"_id": id})
+        return self._MONGO.delete_one({"_id": id}).deleted_count
 
     def _construct_response(self, result: Any) -> List[MODEL]:
         return [self._get_model_type()(**_item) for _item in result]
@@ -87,3 +87,10 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
         if len(_result) == 2:
             raise MultipleDocumentFound("Multiple document found")
         return self._get_model_type()(**_result[0])
+
+    def drop_repository(self):
+        self._MONGO.drop()
+
+    def bulk_save(self, insert_data: List[MODEL]) -> List[ID_TYPE]:
+        _documents = [_item.to_bson() for _item in insert_data]
+        return self._MONGO.insert_many(_documents).inserted_ids

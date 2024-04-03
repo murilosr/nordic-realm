@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Annotated, TypeAlias, TypeVar
 
-from pydantic import Field, PlainSerializer
+from pydantic import Field, PlainSerializer, BeforeValidator
+
+from nordic_realm.utils.pydantic_validators import PydanticValidators
 
 T = TypeVar("T")
 
@@ -27,6 +29,11 @@ DateTimeUTCNow: TypeAlias = Annotated[
     Field(
         default_factory=datetime.utcnow
     )
+]
+
+DateTimeMidnightToday: TypeAlias = Annotated[
+    datetime,
+    BeforeValidator(PydanticValidators.to_midnight)
 ]
 
 MongoIDField: TypeAlias = Annotated[
