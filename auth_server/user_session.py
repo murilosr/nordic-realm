@@ -13,7 +13,7 @@ def refresh_expiry_dt_factory():
 
 
 def access_expiry_dt_factory():
-    return datetime.utcnow() + timedelta(days=30)
+    return datetime.utcnow() + timedelta(days=1)
 
 
 def token_factory():

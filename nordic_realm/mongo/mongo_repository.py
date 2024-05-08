@@ -48,6 +48,9 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
             raise MultipleDocumentFound("Multiple document found")
         return self._get_model_type()(**_result[0])
 
+    def find_all_by_custom_filter(self, _filter: dict) -> list[MODEL]:
+        return self._construct_response(self._MONGO.find(_filter))
+
     def find_by_id(self, id: ID_TYPE) -> Optional[MODEL]:
         if self._get_id_type() == PyObjectId and isinstance(id, str):
             id = ObjectId(id)  # type: ignore

@@ -33,6 +33,6 @@ def run_app():
             host="0.0.0.0",
             port=8080,
             reload=True,
-            workers=1,
+            workers=4,
             log_config=Log().config
         )

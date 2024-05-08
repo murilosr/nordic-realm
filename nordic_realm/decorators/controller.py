@@ -50,7 +50,7 @@ def Repository(collection: str, db: str | None = None, *args, **kwargs):
     return wrapper
 
 
-def MethodRouteMap(method: Literal["GET", "POST", "PUT", "PATCH", "DELETE"]):
+def MethodRouteMap(method: Literal["GET", "POST", "PUT", "PATCH", "DELETE", "WEBSOCKET"]):
     def outer_wrapper(
             path: str,
             response_model: Type = None,
@@ -115,3 +115,8 @@ def Delete(
         public: bool = False
 ):
     return MethodRouteMap("DELETE")(path, response_model, response_code, public)
+
+def WS(
+        path: str,
+):
+    return MethodRouteMap("WEBSOCKET")(path, response_model=None, response_code=None, public=False)

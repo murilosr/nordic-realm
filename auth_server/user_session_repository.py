@@ -5,4 +5,6 @@ from nordic_realm.mongo import MongoRepository
 
 @Repository(collection="user_session")
 class UserSessionRepository(MongoRepository[UserSession, str]):
-    pass
+
+    def delete_all_by_user_id(self, user_id: str):
+        self._MONGO.delete_many({"user_id": user_id})

@@ -77,6 +77,9 @@ class OAuthSecurityMiddleware(AuthenticationBackend):
         raise AuthenticationError(error_msg)
 
     async def authenticate(self, conn):
+        if conn.scope["type"] == "websocket":
+            return self._process_authorization(conn.headers.get("Authorization", None), False)
+
         app = conn.scope["app"]  # type: FastAPI
 
         # Needed for CORS

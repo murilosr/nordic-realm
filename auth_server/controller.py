@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Annotated
 
@@ -21,8 +22,9 @@ class AuthServerController:
         )
 
     @Post("/token/refresh", public=True)
-    def refresh_token(self, refresh_token: Annotated[
+    async def refresh_token(self, refresh_token: Annotated[
         str, Body(embed=True, alias="refreshToken", validation_alias="refreshToken")]):
+        await asyncio.sleep(3.0)
         return self.auth_service.use_refresh_token(
             refresh_token
         )

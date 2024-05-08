@@ -58,13 +58,19 @@ def add_controllers(context: ApplicationContext):
                     if hasattr(_controller_method, "_NR_response_model"):
                         extra_kwargs["response_model"] = _controller_method._NR_response_model
 
-                    app.add_api_route(
-                        path=full_path,
-                        endpoint=instance_obj_endpoint(_v, _controller_method, context),
-                        methods=[method_http_method, "OPTIONS"],
-                        status_code=response_status_code,
-                        **extra_kwargs
-                    )
-                    if (hasattr(_controller_method,
-                                "_NR_public_path") and _controller_method._NR_public_path):
-                        app._NR_public_paths.append(compile_path(full_path)[0])  # type: ignore
+                    if method_http_method == "WEBSOCKET":
+                        app.add_websocket_route(
+                            path=full_path,
+                            route=instance_obj_endpoint(_v, _controller_method, context),
+                        )
+                    else:
+                        app.add_api_route(
+                            path=full_path,
+                            endpoint=instance_obj_endpoint(_v, _controller_method, context),
+                            methods=[method_http_method, "OPTIONS"],
+                            status_code=response_status_code,
+                            **extra_kwargs
+                        )
+                        if (hasattr(_controller_method,
+                                    "_NR_public_path") and _controller_method._NR_public_path):
+                            app._NR_public_paths.append(compile_path(full_path)[0])  # type: ignore

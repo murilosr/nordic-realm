@@ -4,6 +4,7 @@ from typing import List
 from fastapi import FastAPI
 
 from .context import ApplicationContext
+from ..fastapi_server.ws_connection_manager import WebsocketConnectionManager
 
 
 def _get_mongo_connection_config(application_context: ApplicationContext):
@@ -39,13 +40,15 @@ def bootstrap_application_context(
     component_store = ComponentStore()
     singleton_store = SingletonStore()
     mongo_conns = MongoConnections()
+    websocket_conns = WebsocketConnectionManager(config_store)
 
     application_context = ApplicationContext(
         fastapi_app,
         config_store,
         component_store,
         singleton_store,
-        mongo_conns
+        mongo_conns,
+        websocket_conns
     )
 
     if set_global:

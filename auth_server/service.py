@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Annotated
 
 import httpx
@@ -17,11 +18,6 @@ from nordic_realm.di.annotations import Config
 
 @Service()
 class AuthServerService:
-    GOOGLE_AUTH_CODE_EXCHANGE_URL: Annotated[str, Config("credentials.oauth.google.code_exchange_url")]
-    REDIRECT_URL: Annotated[str, Config("credentials.oauth.google.redirect_url")]
-    GRANT_TYPE: Annotated[str, Config("credentials.oauth.google.grant_type")]
-    CLIENT_ID: Annotated[str, Config("credentials.oauth.google.client_id")]
-    CLIENT_SECRET: Annotated[str, Config("credentials.oauth.google.client_secret")]
     APP_SECRET_KEY: Annotated[str, Config("credentials.secret_app_key")]
 
     user_session_repo: UserSessionRepository
@@ -157,3 +153,17 @@ class AuthServerService:
             access_token=auth_jwt,
             refresh_token=refresh_jwt
         )
+
+    def invalidate_all_sessions_by_user_id(self, user_id: str):
+        self.user_session_repo.delete_all_by_user_id(user_id)
+
+    def update_session_expiry_dates(self,
+                                    user_session: UserSession,
+                                    access_token_timedelta_seconds=2592000,  # 30 days
+                                    refresh_token_timedelta_seconds=3 * 2592000  # 90 days
+                                    ) -> UserSession:
+
+        user_session.access_token_expiry_dt = datetime.utcnow() + timedelta(seconds=access_token_timedelta_seconds)
+        user_session.refresh_token_expiry_dt = datetime.utcnow() + timedelta(seconds=refresh_token_timedelta_seconds)
+
+        return self.user_session_repo.save(user_session)
