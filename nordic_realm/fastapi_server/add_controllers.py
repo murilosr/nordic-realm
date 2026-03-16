@@ -21,7 +21,14 @@ def instance_obj_endpoint(clz, method, context: ApplicationContext):
         wrapper = wrapper_async
 
     method_sig = inspect.signature(method)
-    new_parameters = [p for (p_name, p,) in method_sig.parameters.items() if p_name != "self"]
+    new_parameters = [
+        p
+        for (
+            p_name,
+            p,
+        ) in method_sig.parameters.items()
+        if p_name != "self"
+    ]
     wrapper_sig = inspect.signature(wrapper).replace(parameters=new_parameters)
     wrapper.__signature__ = wrapper_sig
 
@@ -45,7 +52,12 @@ def add_controllers(context: ApplicationContext):
                     if callable(_controller_method):
                         if "_NR_type" in dir(_controller_method):
                             if _controller_method._NR_type == "controller_method":
-                                sorted_routes.append((_controller_method._NR_path.find("{"), _controller_method,))
+                                sorted_routes.append(
+                                    (
+                                        _controller_method._NR_path.find("{"),
+                                        _controller_method,
+                                    )
+                                )
                 sorted_routes.sort(key=lambda _item: _item[0])
 
                 for _, _controller_method in sorted_routes:
@@ -56,21 +68,29 @@ def add_controllers(context: ApplicationContext):
 
                     extra_kwargs = {}
                     if hasattr(_controller_method, "_NR_response_model"):
-                        extra_kwargs["response_model"] = _controller_method._NR_response_model
+                        extra_kwargs["response_model"] = (
+                            _controller_method._NR_response_model
+                        )
 
                     if method_http_method == "WEBSOCKET":
                         app.add_websocket_route(
                             path=full_path,
-                            route=instance_obj_endpoint(_v, _controller_method, context),
+                            route=instance_obj_endpoint(
+                                _v, _controller_method, context
+                            ),
                         )
                     else:
                         app.add_api_route(
                             path=full_path,
-                            endpoint=instance_obj_endpoint(_v, _controller_method, context),
+                            endpoint=instance_obj_endpoint(
+                                _v, _controller_method, context
+                            ),
                             methods=[method_http_method, "OPTIONS"],
                             status_code=response_status_code,
-                            **extra_kwargs
+                            **extra_kwargs,
                         )
-                        if (hasattr(_controller_method,
-                                    "_NR_public_path") and _controller_method._NR_public_path):
+                        if (
+                            hasattr(_controller_method, "_NR_public_path")
+                            and _controller_method._NR_public_path
+                        ):
                             app._NR_public_paths.append(compile_path(full_path)[0])  # type: ignore

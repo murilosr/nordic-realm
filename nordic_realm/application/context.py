@@ -8,7 +8,6 @@ _global_app_context: "ApplicationContext" = None  # type: ignore
 
 
 class ApplicationContext:
-
     @staticmethod
     def get():
         global _global_app_context
@@ -16,13 +15,15 @@ class ApplicationContext:
             raise Exception("Global ApplicationContext not initialized")
         return _global_app_context
 
-    def __init__(self,
-                 fastapi_app: FastAPI,
-                 config_store: ConfigStore,
-                 component_store: ComponentStore,
-                 singleton_store: SingletonStore,
-                 mongo_conns: MongoConnections,
-                 websocket_conns: WebsocketConnectionManager):
+    def __init__(
+        self,
+        fastapi_app: FastAPI,
+        config_store: ConfigStore,
+        component_store: ComponentStore,
+        singleton_store: SingletonStore,
+        mongo_conns: MongoConnections,
+        websocket_conns: WebsocketConnectionManager,
+    ):
         self.fastapi_app = fastapi_app
         self.config_store = config_store
         self.component_store = component_store

@@ -50,12 +50,14 @@ def Repository(collection: str, db: str | None = None, *args, **kwargs):
     return wrapper
 
 
-def MethodRouteMap(method: Literal["GET", "POST", "PUT", "PATCH", "DELETE", "WEBSOCKET"]):
+def MethodRouteMap(
+    method: Literal["GET", "POST", "PUT", "PATCH", "DELETE", "WEBSOCKET"],
+):
     def outer_wrapper(
-            path: str,
-            response_model: Type = None,
-            response_code: HTTPStatus | int | None = None,
-            public: bool = False
+        path: str,
+        response_model: Type | None = None,
+        response_code: HTTPStatus | int | None = None,
+        public: bool = False,
     ):
         def wrapper(f: Callable[..., Any], *args2, **kwargs2):
             f._NR_path = path
@@ -73,50 +75,53 @@ def MethodRouteMap(method: Literal["GET", "POST", "PUT", "PATCH", "DELETE", "WEB
 
 
 def Get(
-        path: str,
-        response_model: Type = None,
-        response_code: HTTPStatus | int | None = None,
-        public: bool = False
+    path: str,
+    response_model: Type | None = None,
+    response_code: HTTPStatus | int | None = None,
+    public: bool = False,
 ):
     return MethodRouteMap("GET")(path, response_model, response_code, public)
 
 
 def Post(
-        path: str,
-        response_model: Type = None,
-        response_code: HTTPStatus | int | None = None,
-        public: bool = False
+    path: str,
+    response_model: Type | None = None,
+    response_code: HTTPStatus | int | None = None,
+    public: bool = False,
 ):
     return MethodRouteMap("POST")(path, response_model, response_code, public)
 
 
 def Put(
-        path: str,
-        response_model: Type = None,
-        response_code: HTTPStatus | int | None = None,
-        public: bool = False
+    path: str,
+    response_model: Type | None = None,
+    response_code: HTTPStatus | int | None = None,
+    public: bool = False,
 ):
     return MethodRouteMap("PUT")(path, response_model, response_code, public)
 
 
 def Patch(
-        path: str,
-        response_model: Type = None,
-        response_code: HTTPStatus | int | None = None,
-        public: bool = False
+    path: str,
+    response_model: Type | None = None,
+    response_code: HTTPStatus | int | None = None,
+    public: bool = False,
 ):
     return MethodRouteMap("PATCH")(path, response_model, response_code, public)
 
 
 def Delete(
-        path: str,
-        response_model: Type = None,
-        response_code: HTTPStatus | int | None = None,
-        public: bool = False
+    path: str,
+    response_model: Type | None = None,
+    response_code: HTTPStatus | int | None = None,
+    public: bool = False,
 ):
     return MethodRouteMap("DELETE")(path, response_model, response_code, public)
 
+
 def WS(
-        path: str,
+    path: str,
 ):
-    return MethodRouteMap("WEBSOCKET")(path, response_model=None, response_code=None, public=False)
+    return MethodRouteMap("WEBSOCKET")(
+        path, response_model=None, response_code=None, public=False
+    )

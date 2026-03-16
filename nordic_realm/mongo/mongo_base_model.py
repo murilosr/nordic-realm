@@ -1,8 +1,14 @@
 from typing import Type
 
 from bson import ObjectId
-from pydantic import (AfterValidator, BaseModel, ConfigDict, Field,
-                      PlainSerializer, WithJsonSchema)
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    PlainSerializer,
+    WithJsonSchema,
+)
 from pydantic.alias_generators import to_camel
 from typing_extensions import Annotated, Any, Dict, Generic, TypeVar, Union
 
@@ -22,7 +28,7 @@ PyObjectId = Annotated[
     WithJsonSchema({"type": "string"}, mode="serialization"),
 ]
 
-ID_TYPE = TypeVar('ID_TYPE', default=PyObjectId)
+ID_TYPE = TypeVar("ID_TYPE", default=PyObjectId)
 
 
 def remove_is_ref(root_dict: dict[str, Any]):
@@ -45,7 +51,7 @@ class MongoBaseModel(BaseModel, Generic[ID_TYPE]):
         arbitrary_types_allowed=True,
         extra="ignore",
         alias_generator=to_camel,
-        populate_by_name=True
+        populate_by_name=True,
     )
 
     def get_id_type(self) -> Type:

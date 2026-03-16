@@ -32,17 +32,33 @@ class WebsocketConnectionManager:
             await pubsub.psubscribe("ws")
 
             while True:
-                message = await pubsub.get_message(ignore_subscribe_messages=True, timeout=20)
+                message = await pubsub.get_message(
+                    ignore_subscribe_messages=True, timeout=20
+                )
                 redis_logger.log(0, message)
                 if message is not None:
                     redis_logger.debug(f"Received ({self._process_id}): {message}")
-                    recv_data = RedisMessage.model_validate_json(message["data"].decode())
+                    recv_data = RedisMessage.model_validate_json(
+                        message["data"].decode()
+                    )
                     if recv_data.process != self._process_id:
-                        if recv_data.type == "send_to_user" and recv_data.user_id is not None:
-                            await self.send_to_user(recv_data.message, recv_data.user_id, _redis_publish=False)
+                        if (
+                            recv_data.type == "send_to_user"
+                            and recv_data.user_id is not None
+                        ):
+                            await self.send_to_user(
+                                recv_data.message,
+                                recv_data.user_id,
+                                _redis_publish=False,
+                            )
 
     async def _redis_publish(self, type: str, message: str, user_id: str | None = None):
-        payload = RedisMessage(type=type, message=message, user_id=user_id, process=self._process_id).model_dump_json()
+        payload = RedisMessage(
+            type=type,  # type: ignore
+            message=message,
+            user_id=user_id,
+            process=self._process_id,
+        ).model_dump_json()
 
         redis_logger.debug(f"Publish: {payload}")
         await self._redis_conn.publish("ws", payload.encode())
@@ -64,13 +80,17 @@ class WebsocketConnectionManager:
         if len(ws_list) == 0:
             self.section_connections.pop(_user_id)
 
-    async def send_to_user(self, message: str, user_id: str, _redis_publish: bool = True):
+    async def send_to_user(
+        self, message: str, user_id: str, _redis_publish: bool = True
+    ):
         if _redis_publish:
             await self._redis_publish("send_to_user", message, user_id)
         for _conn in self.section_connections.get(user_id, []):
             await _conn.send_text(message)
 
-    async def send_to_connection(self, message: str, websocket: WebSocket, _redis_publish: bool = True):
+    async def send_to_connection(
+        self, message: str, websocket: WebSocket, _redis_publish: bool = True
+    ):
         if _redis_publish:
             await self._redis_publish("broadcast", message)
 

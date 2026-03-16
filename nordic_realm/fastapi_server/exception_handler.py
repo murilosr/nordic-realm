@@ -1,9 +1,13 @@
 from http import HTTPStatus
-from typing import Type, TYPE_CHECKING
+from typing import TYPE_CHECKING, Type
 
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
-from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, InvalidTokenError
+from jwt.exceptions import (
+    ExpiredSignatureError,
+    InvalidSignatureError,
+    InvalidTokenError,
+)
 from starlette.authentication import AuthenticationError
 
 from nordic_realm.mongo import DocumentNotFound, MultipleDocumentFound
@@ -36,24 +40,33 @@ def http_exception_proxy(status_code: int):
             headers = {
                 "Access-Control-Allow-Credentials": "true",
                 "Access-Control-Allow-Origin": request_origin,
-                "Access-Control-Allow-Methods": ", ".join(("DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT",))
+                "Access-Control-Allow-Methods": ", ".join(
+                    (
+                        "DELETE",
+                        "GET",
+                        "HEAD",
+                        "OPTIONS",
+                        "PATCH",
+                        "POST",
+                        "PUT",
+                    )
+                ),
             }
 
         return JSONResponse(
             content={
                 "status_code": status_code,
                 "exception": classname,
-                "detail": message
+                "detail": message,
             },
             status_code=status_code,
-            headers=headers
+            headers=headers,
         )
 
     return _internal_proxy
 
 
 class FastAPIExceptionHandler:
-
     @staticmethod
     def install_exception_handler(app_context: "ApplicationContext"):
         FastAPIExceptionHandler(app_context)
@@ -78,5 +91,12 @@ class FastAPIExceptionHandler:
         self._add_batch([MultipleDocumentFound], HTTPStatus.BAD_REQUEST)
 
     def _add_jwt_errors(self):
-        self._add_batch([AuthenticationError, ExpiredSignatureError, InvalidSignatureError, InvalidTokenError],
-                        HTTPStatus.UNAUTHORIZED)
+        self._add_batch(
+            [
+                AuthenticationError,
+                ExpiredSignatureError,
+                InvalidSignatureError,
+                InvalidTokenError,
+            ],
+            HTTPStatus.UNAUTHORIZED,
+        )

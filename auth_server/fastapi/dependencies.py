@@ -1,5 +1,5 @@
 from importlib import import_module
-from typing import TypeVar, TypeAlias, Annotated, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Annotated, Optional, TypeAlias, TypeVar
 
 import fastapi
 from starlette.authentication import AuthenticationError

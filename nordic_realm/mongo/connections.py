@@ -4,7 +4,6 @@ from pymongo import MongoClient
 
 
 class MongoConnections:
-
     def __init__(self):
         self._connections: Dict[str, MongoClient] = {}
 

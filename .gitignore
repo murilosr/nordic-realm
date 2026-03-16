@@ -1,4 +1,9 @@
 secrets*.yaml
+!secrets-template.yaml
+.claude/
+.ruff_cache/
+.vscode/
+
 draft.py
 draft.ipynb
 

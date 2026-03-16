@@ -1,6 +1,5 @@
 from starlette.authentication import BaseUser
 
-from auth_server.dtos.open_id_profile import OpenIdProfile
 from nordic_realm.decorators.controller import Component
 
 
@@ -43,12 +42,8 @@ class UserInterface:
 
 @Component()
 class UserAuthenticationProvider:
-
     def authenticate_by_password(self, username: str, password: str) -> BaseUser:
         raise NotImplementedError("This must be overriden")
 
     def find_user_by_email(self, email: str) -> UserInterface | None:
-        raise NotImplementedError("This must be overriden")
-
-    def create_user(self, profile: OpenIdProfile) -> UserInterface:
         raise NotImplementedError("This must be overriden")

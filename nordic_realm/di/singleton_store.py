@@ -9,13 +9,12 @@ T = TypeVar("T")
 
 
 class SingletonStore(Generic[T]):
-
     def __init__(self):
         self._store: Dict[str, Type] = {}
 
     @classmethod
     def _get_name(cls, clz: Type) -> str:
-        return f"{clz.__module__}:{clz.__name__}";
+        return f"{clz.__module__}:{clz.__name__}"
 
     def register(self, obj: Any):
         _key = self._get_name(type(obj))
@@ -27,7 +26,7 @@ class SingletonStore(Generic[T]):
         self._store[_key] = obj
 
     def get(self, clazz: Type[T]) -> T:
-        if (not isclass(clazz)):
+        if not isclass(clazz):
             raise TypeError(f"{clazz} is not a class")
 
         _name = self._get_name(clazz)

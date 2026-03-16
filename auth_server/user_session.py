@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import TypeAlias, Annotated
+from typing import Annotated, TypeAlias
 
 from pydantic import Field
 
@@ -9,11 +9,11 @@ from nordic_realm.utils.pydantic.types import DateTimeUTCNow
 
 
 def refresh_expiry_dt_factory():
-    return datetime.utcnow() + timedelta(days=30)
+    return datetime.now() + timedelta(days=30)
 
 
 def access_expiry_dt_factory():
-    return datetime.utcnow() + timedelta(days=1)
+    return datetime.now() + timedelta(days=1)
 
 
 def token_factory():
@@ -34,11 +34,7 @@ class UserSession(MongoBaseModel[str]):
 
     @staticmethod
     def create(user_id: str, user_agent: str) -> "UserSession":
-        return UserSession(
-            id=generate_id(),
-            user_id=user_id,
-            user_agent=user_agent
-        )
+        return UserSession(id=generate_id(), user_id=user_id, user_agent=user_agent)  # type: ignore
 
     def generate_new_tokens(self):
         self.access_token_tid = token_factory()

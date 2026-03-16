@@ -1,10 +1,11 @@
 import logging
 from inspect import isclass
-from typing import Annotated, Any, Generic, Type, TypeVar, ClassVar, Dict
+from typing import Annotated, Any, ClassVar, Dict, Generic, Type, TypeVar
 
 from typing_extensions import _AnnotatedAlias
 
 from nordic_realm.application import ApplicationContext
+
 from .annotations import Config
 from .exceptions import ComponentNotRegistered, IgnoreInjection
 
@@ -13,9 +14,12 @@ log = logging.getLogger("nordic_realm.di")
 
 
 class DIInjector(Generic[T]):
-
-    def __init__(self, app_context: ApplicationContext | None = None, use_cache: bool = True):
-        self.app_context = app_context if app_context is not None else ApplicationContext.get()
+    def __init__(
+        self, app_context: ApplicationContext | None = None, use_cache: bool = True
+    ):
+        self.app_context = (
+            app_context if app_context is not None else ApplicationContext.get()
+        )
         self._use_cache = use_cache
         self._obj_cache: Dict[str, Any] = {}
 
@@ -27,28 +31,28 @@ class DIInjector(Generic[T]):
         return class_name in self._obj_cache
 
     def _set_cache(self, class_name: str, obj: Any):
-        if (self._use_cache):
+        if self._use_cache:
             self._obj_cache[class_name] = obj
 
     def _get_object(self, annotation_type: Type):
         _clazz: Type
 
-        if (isinstance(annotation_type, Annotated)):
+        if isinstance(annotation_type, Annotated):
             log.debug(f"{annotation_type} is annotated")
             _clazz: Type = annotation_type.__args__[0]
             for _ann in annotation_type.__args__[1:]:
-                if (isinstance(_ann, Config)):
+                if isinstance(_ann, Config):
                     return self.app_context.config_store.get(_ann.path)
-                elif (_ann == ClassVar):
+                elif _ann == ClassVar:
                     raise IgnoreInjection()
-        elif (isinstance(annotation_type, _AnnotatedAlias)):
+        elif isinstance(annotation_type, _AnnotatedAlias):
             _clazz = annotation_type.__args__[0]
             for _ann in annotation_type.__metadata__:
-                if (isinstance(_ann, Config)):
+                if isinstance(_ann, Config):
                     return self.app_context.config_store.get(_ann.path)
-                elif (_ann == ClassVar):
+                elif _ann == ClassVar:
                     raise IgnoreInjection()
-        elif (isclass(annotation_type)):
+        elif isclass(annotation_type):
             log.debug(f"{annotation_type} is class")
             _clazz = annotation_type
         else:
@@ -77,7 +81,9 @@ class DIInjector(Generic[T]):
 
         _new_subobject = self.instance(_clazz)
 
-        if (hasattr(_new_subobject, "_post_init") and callable(_new_subobject._post_init)):  # type: ignore
+        if hasattr(_new_subobject, "_post_init") and callable(
+            _new_subobject._post_init
+        ):  # type: ignore
             _new_subobject._post_init()  # type: ignore
 
         self._set_cache(clazz_name, _new_subobject)
@@ -85,12 +91,12 @@ class DIInjector(Generic[T]):
 
     def instance(self, clazz: Type[T], _new_obj: T | None = None) -> T:  # type: ignore
         _is_root = False
-        if (_new_obj is None):
+        if _new_obj is None:
             _is_root = True
             log.debug(f"Injector: instancing a new object of type {clazz}")
             _new_obj: T = self.app_context.component_store.get(clazz)()
 
-        if (hasattr(clazz, "__annotations__")):
+        if hasattr(clazz, "__annotations__"):
             for _ank, _anv in clazz.__annotations__.items():
                 log.debug(f"Field {_ank} - ")
                 try:

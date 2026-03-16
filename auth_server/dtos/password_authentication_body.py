@@ -2,5 +2,5 @@ from pydantic import BaseModel
 
 
 class PasswordAuthenticationBodyDto(BaseModel):
-    username: str
-    password: str
+    usuario: str
+    senha_texto: str

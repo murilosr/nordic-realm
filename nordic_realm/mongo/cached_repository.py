@@ -1,10 +1,9 @@
 from typing import Generic
 
-from nordic_realm.mongo.mongo_repository import MongoRepository, MODEL, ID_TYPE
+from nordic_realm.mongo.mongo_repository import ID_TYPE, MODEL, MongoRepository
 
 
 class CachedRepository(Generic[MODEL, ID_TYPE]):
-
     def __init__(self, mongo_repository: MongoRepository):
         self._repo = mongo_repository
         self._cache = {}

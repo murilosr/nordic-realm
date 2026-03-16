@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nordic_realm"
+version = "0.1.0"
+description = "Custom Python web framework built on FastAPI with Spring-like dependency injection"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.135.1",
+    "uvicorn[standard]>=0.42.0",
+    "pydantic>=2.12.5",
+    "pymongo>=4.16.0",
+    "PyJWT>=2.12.1",
+    "httpx>=0.28.1",
+    "redis>=7.3.0",
+    "bcrypt>=5.0.0",
+    "PyYAML>=6.0.3",
+    "aiofiles>=23.0.0",
+    "typing_extensions>=4.15.0",
+    "python-dotenv>=1.2.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.2",
+]
+
+[tool.setuptools.packages.find]
+include = ["nordic_realm*", "auth_server*", "app*"]
+
+[tool.ruff.lint]
+select = ["F", "I"]  # F = unused imports, I = isort
+
+[tool.ruff.lint.isort]
+known-first-party = ["nordic_realm", "app", "auth_server"]

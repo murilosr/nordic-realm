@@ -1,5 +1,15 @@
 from importlib import import_module
-from typing import Annotated, Any, ClassVar, Generic, List, Optional, Type, TypeVar, TYPE_CHECKING
+from typing import (
+    TYPE_CHECKING,
+    Annotated,
+    Any,
+    ClassVar,
+    Generic,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+)
 
 from bson import ObjectId
 from pymongo import MongoClient
@@ -10,8 +20,8 @@ from nordic_realm.mongo.mongo_base_model import MongoBaseModel, PyObjectId
 if TYPE_CHECKING:
     from nordic_realm.application import ApplicationContext
 
-MODEL = TypeVar('MODEL', bound=MongoBaseModel[Any])
-ID_TYPE = TypeVar('ID_TYPE')
+MODEL = TypeVar("MODEL", bound=MongoBaseModel[Any])
+ID_TYPE = TypeVar("ID_TYPE")
 
 _ApplicationContext: Optional["ApplicationContext"] = None
 
@@ -25,13 +35,17 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
         global _ApplicationContext
 
         if _ApplicationContext is None:
-            _ApplicationContext = import_module("nordic_realm.application.context").ApplicationContext
+            _ApplicationContext = import_module(
+                "nordic_realm.application.context"
+            ).ApplicationContext
 
         db = self.__class__._DB
         if db is None:
             db = _ApplicationContext.get().config_store.get("mongodb.db")
             if not isinstance(db, str):
-                raise ValueError("Provide a database via 'db' parameter or via mongodb.db in secrets.yaml")
+                raise ValueError(
+                    "Provide a database via 'db' parameter or via mongodb.db in secrets.yaml"
+                )
 
         self._MONGO = self._MONGO_CLIENT[db][self._COLLECTION]
 
@@ -66,8 +80,12 @@ class MongoRepository(Generic[MODEL, ID_TYPE]):
             if self._get_id_type() == PyObjectId:
                 entity.id = ObjectId()  # type: ignore
             else:
-                raise Exception(f"id was not supposed to be None when type is '{self._get_id_type().__name__}'")
-        self._MONGO.update_one({"_id": entity.id}, {"$set": entity.to_bson()}, upsert=True)
+                raise Exception(
+                    f"id was not supposed to be None when type is '{self._get_id_type().__name__}'"
+                )
+        self._MONGO.update_one(
+            {"_id": entity.id}, {"$set": entity.to_bson()}, upsert=True
+        )
         return self._get_model_type()(**entity.to_bson())
 
     def _get_model_type(self) -> Type[MODEL]:
